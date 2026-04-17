@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Oraciones</title>
-<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#111111">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 :root {
   --bg:#f8f6f1; --card:#ffffff; --text:#181818; --muted:#6b665d; --line:#e5dece;
@@ -17,12 +17,11 @@ body.dark {
   --primary:#c89763; --soft:#24211d; --danger:#d56d61;
 }
 * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html, body { margin:0; height:100%; }
+html, body { margin:0; min-height:100%; }
 body { font-family: Arial, sans-serif; background:var(--bg); color:var(--text); }
 button, input, textarea { font-family: inherit; }
-.app { min-height:100dvh; display:flex; flex-direction:column; }
 .topbar {
-  position:sticky; top:0; z-index:50; padding:calc(8px + env(safe-area-inset-top)) 10px 8px;
+  position:sticky; top:0; z-index:40; padding:calc(8px + env(safe-area-inset-top)) 10px 8px;
   background:rgba(248,246,241,.96); backdrop-filter: blur(10px); border-bottom:1px solid var(--line);
 }
 body.dark .topbar { background:rgba(17,17,17,.96); }
@@ -32,10 +31,10 @@ body.dark .topbar { background:rgba(17,17,17,.96); }
 .btn.soft { background:var(--soft); color:var(--text); }
 .btn.danger { background:var(--danger); color:#fff; }
 .search {
-  flex:1; min-width:180px; border:1px solid var(--line); background:var(--card); color:var(--text);
-  border-radius:14px; padding:10px 12px; font-size:15px;
+  flex:1; min-width:180px; border:1px solid var(--line); background:var(--card);
+  color:var(--text); border-radius:14px; padding:10px 12px; font-size:15px;
 }
-.main { flex:1; display:grid; grid-template-columns:300px 1fr; min-height:0; }
+.main { display:grid; grid-template-columns:300px 1fr; min-height:calc(100dvh - 68px); }
 .sidebar { border-right:1px solid var(--line); overflow:auto; background:var(--bg); padding:10px; }
 .list { display:flex; flex-direction:column; gap:8px; }
 .item { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px; cursor:pointer; }
@@ -53,25 +52,21 @@ body.dark .topbar { background:rgba(17,17,17,.96); }
 }
 .reader-title { font-size:24px; font-weight:bold; padding:16px 18px 0; }
 .reader-text { white-space:pre-wrap; padding:18px 18px 40px; font-size:24px; line-height:2.05; }
-.hidden { display:none !important; }
 .title-input {
-  width:100%; border:none; border-bottom:1px solid var(--line); outline:none; background:var(--card);
-  color:var(--text); font-size:22px; font-weight:bold; padding:14px 16px;
+  width:100%; border:none; border-bottom:1px solid var(--line); outline:none;
+  background:var(--card); color:var(--text); font-size:22px; font-weight:bold; padding:14px 16px;
 }
 .text-input {
-  flex:1; width:100%; border:none; outline:none; resize:none; background:var(--card); color:var(--text);
-  font-size:22px; line-height:2; padding:18px; min-height:50dvh;
+  flex:1; width:100%; border:none; outline:none; resize:none; background:var(--card);
+  color:var(--text); font-size:22px; line-height:2; padding:18px; min-height:50dvh;
 }
+.hidden { display:none !important; }
 .empty { color:var(--muted); padding:18px; }
 .toast {
   position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:#111; color:#fff;
   padding:10px 14px; border-radius:999px; font-size:14px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:80;
 }
 .toast.show { opacity:1; }
-.flash {
-  outline:3px solid var(--primary);
-  transition:outline .15s;
-}
 @media (max-width:860px) {
   .main { grid-template-columns:1fr; }
   .sidebar { display:block; border-right:none; border-bottom:1px solid var(--line); max-height:34dvh; }
@@ -87,56 +82,54 @@ body.dark .topbar { background:rgba(17,17,17,.96); }
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="topbar">
-    <div class="topbar-row">
-      <button class="btn primary" onclick="newPrayer()">➕ Nueva</button>
-      <button class="btn soft" onclick="openReader(true)">📖 Leer</button>
-      <button class="btn soft" onclick="openEditor()">✍️ Editar</button>
-      <button class="btn soft" onclick="copyPrayer()">📋 Copiar</button>
-      <button class="btn soft" onclick="toggleTheme()">🌙</button>
-      <button class="btn danger" onclick="deletePrayer()">🗑️</button>
-      <button class="btn soft" onclick="hardReset()">♻️ Reset</button>
-      <input id="search" class="search" placeholder="Buscar oración..." oninput="renderList()">
+<div class="topbar">
+  <div class="topbar-row">
+    <button class="btn primary" onclick="newPrayer()">➕ Nueva</button>
+    <button class="btn soft" onclick="openReader()">📖 Leer</button>
+    <button class="btn soft" onclick="openEditor()">✍️ Editar</button>
+    <button class="btn soft" onclick="copyPrayer()">📋 Copiar</button>
+    <button class="btn soft" onclick="toggleTheme()">🌙</button>
+    <button class="btn danger" onclick="deletePrayer()">🗑️</button>
+    <button class="btn soft" onclick="resetApp()">♻️ Reset</button>
+    <input id="search" class="search" placeholder="Buscar oración..." oninput="renderList()">
+  </div>
+</div>
+
+<div class="main">
+  <aside class="sidebar">
+    <div id="list" class="list"></div>
+  </aside>
+
+  <section class="content">
+    <div id="readerView" class="reader">
+      <div class="reader-head">
+        <button class="btn soft" onclick="openList()">☰ Lista</button>
+        <button class="btn soft" onclick="openEditor()">✍️ Editar</button>
+        <button class="btn soft" onclick="changeReaderSize(-1)">A-</button>
+        <button class="btn soft" onclick="changeReaderSize(1)">A+</button>
+        <button class="btn soft" onclick="copyPrayer()">📋 Copiar</button>
+      </div>
+      <div id="readerTitle" class="reader-title"></div>
+      <div id="readerText" class="reader-text"></div>
     </div>
-  </div>
 
-  <div class="main">
-    <aside class="sidebar">
-      <div id="list" class="list"></div>
-    </aside>
-
-    <section class="content">
-      <div id="readerView" class="reader">
-        <div class="reader-head">
-          <button class="btn soft" onclick="openList()">☰ Lista</button>
-          <button class="btn soft" onclick="openEditor()">✍️ Editar</button>
-          <button class="btn soft" onclick="changeReaderSize(-1)">A-</button>
-          <button class="btn soft" onclick="changeReaderSize(1)">A+</button>
-          <button class="btn soft" onclick="copyPrayer()">📋 Copiar</button>
-        </div>
-        <div id="readerTitle" class="reader-title"></div>
-        <div id="readerText" class="reader-text"></div>
+    <div id="editorView" class="editor hidden">
+      <div class="editor-head">
+        <button class="btn primary" onclick="saveAndBack()">💾 Guardar y volver</button>
+        <button class="btn soft" onclick="cancelEdit()">← Volver</button>
       </div>
-
-      <div id="editorView" class="editor hidden">
-        <div class="editor-head">
-          <button class="btn primary" onclick="saveAndBack()">💾 Guardar y volver</button>
-          <button class="btn soft" onclick="cancelEdit()">← Volver</button>
-        </div>
-        <input id="editTitle" class="title-input" placeholder="Título de la oración">
-        <textarea id="editText" class="text-input" placeholder="Escribe aquí tu oración..."></textarea>
-      </div>
-    </section>
-  </div>
+      <input id="editTitle" class="title-input" placeholder="Título de la oración">
+      <textarea id="editText" class="text-input" placeholder="Escribe aquí tu oración..."></textarea>
+    </div>
+  </section>
 </div>
 
 <div id="toast" class="toast">Guardado</div>
 
 <script>
-const STORAGE_KEY = "oraciones_estable_v3_fixleer";
-const THEME_KEY = "oraciones_estable_theme_v3_fixleer";
-const SIZE_KEY = "oraciones_estable_reader_size_v3_fixleer";
+const STORAGE_KEY = "oraciones_sin_cache_v1";
+const THEME_KEY = "oraciones_sin_cache_theme_v1";
+const SIZE_KEY = "oraciones_sin_cache_reader_size_v1";
 
 let readerSize = parseInt(localStorage.getItem(SIZE_KEY) || "24", 10);
 let state = { currentId: null, items: [] };
@@ -150,7 +143,6 @@ function toast(msg) {
   window.__toastTimer = setTimeout(() => el.classList.remove("show"), 1300);
 }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
-function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 function buildInitialState() {
   const id = uid();
   return {
@@ -158,6 +150,7 @@ function buildInitialState() {
     items: [{ id: id, title: "🌅 ✝️ Oración diaria completa", content: textoInicial, updatedAt: Date.now() }]
   };
 }
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (raw) {
@@ -203,20 +196,14 @@ function renderReader() {
   document.getElementById("readerText").textContent = item.content;
   document.getElementById("readerText").style.fontSize = readerSize + "px";
 }
-function forceReaderVisual() {
-  const rv = document.getElementById("readerView");
-  rv.classList.add("flash");
-  setTimeout(() => rv.classList.remove("flash"), 220);
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
 function selectPrayer(id) {
   state.currentId = id;
   saveState();
   renderList();
   renderReader();
-  openReader(false);
+  openReader();
 }
-function openReader(showFeedback) {
+function openReader() {
   document.getElementById("readerView").classList.remove("hidden");
   document.getElementById("editorView").classList.add("hidden");
   if (window.innerWidth <= 860) {
@@ -224,10 +211,7 @@ function openReader(showFeedback) {
   } else {
     document.body.classList.remove("reading-mobile");
   }
-  if (showFeedback) {
-    toast("Modo lectura");
-    forceReaderVisual();
-  }
+  toast("Modo lectura");
 }
 function openEditor() {
   const item = currentPrayer();
@@ -248,10 +232,10 @@ function saveAndBack() {
   saveState();
   renderList();
   renderReader();
-  openReader(true);
+  openReader();
   toast("Guardado");
 }
-function cancelEdit() { openReader(true); }
+function cancelEdit() { openReader(); }
 function newPrayer() {
   const id = uid();
   state.items.unshift({ id: id, title: "Nueva oración", content: "", updatedAt: Date.now() });
@@ -271,7 +255,7 @@ function deletePrayer() {
   saveState();
   renderList();
   renderReader();
-  openReader(true);
+  openReader();
   toast("Borrada");
 }
 function copyPrayer() {
@@ -298,7 +282,7 @@ function openList() {
   document.getElementById("search").focus();
   toast("Lista abierta");
 }
-function hardReset() {
+function resetApp() {
   if (!confirm("Esto reiniciará la app y dejará solo la oración inicial. ¿Continuar?")) return;
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(SIZE_KEY);
@@ -306,18 +290,15 @@ function hardReset() {
   saveState();
   renderList();
   renderReader();
-  openReader(true);
+  openReader();
   toast("App reiniciada");
 }
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.update()));
-  navigator.serviceWorker.register("sw.js");
-}
+
 applyTheme();
 loadState();
 renderList();
 renderReader();
-openReader(false);
+openReader();
 </script>
 </body>
 </html>
