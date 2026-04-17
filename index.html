@@ -51,6 +51,7 @@ body.dark .topbar { background:rgba(17,17,17,.96); }
 .reader-head, .editor-head {
   position:sticky; top:0; z-index:3; display:flex; gap:8px; flex-wrap:wrap; padding:10px;
   border-bottom:1px solid var(--line); background:var(--card);
+  transition:opacity .2s, transform .2s;
 }
 .reader-title { font-size:24px; font-weight:bold; padding:16px 18px 0; }
 .reader-text { white-space:pre-wrap; padding:18px 18px 40px; font-size:24px; line-height:2.05; }
@@ -100,6 +101,12 @@ body.dark .topbar { background:rgba(17,17,17,.96); }
   font-size:25px;
   line-height:2.1;
   padding:16px 16px 48px;
+  min-height:100dvh;
+}
+.fullscreen-reading.hide-reading-ui .reader-head {
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(-12px);
 }
 
 @media (max-width:860px) {
@@ -137,16 +144,16 @@ body.dark .topbar { background:rgba(17,17,17,.96); }
 
   <section class="content">
     <div id="readerView" class="reader">
-      <div class="reader-head">
-        <button class="btn soft" onclick="exitFullscreenReading()">← Volver</button>
-        <button class="btn soft" onclick="openList()">☰ Lista</button>
-        <button class="btn soft" onclick="openEditor()">✍️ Editar</button>
-        <button class="btn soft" onclick="changeReaderSize(-1)">A-</button>
-        <button class="btn soft" onclick="changeReaderSize(1)">A+</button>
-        <button class="btn soft" onclick="copyPrayer()">📋 Copiar</button>
+      <div id="readerHead" class="reader-head">
+        <button class="btn soft" onclick="exitFullscreenReading(); event.stopPropagation();">← Volver</button>
+        <button class="btn soft" onclick="openList(); event.stopPropagation();">☰ Lista</button>
+        <button class="btn soft" onclick="openEditor(); event.stopPropagation();">✍️ Editar</button>
+        <button class="btn soft" onclick="changeReaderSize(-1); event.stopPropagation();">A-</button>
+        <button class="btn soft" onclick="changeReaderSize(1); event.stopPropagation();">A+</button>
+        <button class="btn soft" onclick="copyPrayer(); event.stopPropagation();">📋 Copiar</button>
       </div>
       <div id="readerTitle" class="reader-title"></div>
-      <div id="readerText" class="reader-text"></div>
+      <div id="readerText" class="reader-text" onclick="toggleReadingUI(event)"></div>
     </div>
 
     <div id="editorView" class="editor hidden">
@@ -163,9 +170,9 @@ body.dark .topbar { background:rgba(17,17,17,.96); }
 <div id="toast" class="toast">Guardado</div>
 
 <script>
-const STORAGE_KEY = "oraciones_pantalla_completa_v1";
-const THEME_KEY = "oraciones_pantalla_completa_theme_v1";
-const SIZE_KEY = "oraciones_pantalla_completa_reader_size_v1";
+const STORAGE_KEY = "oraciones_ocultar_botones_v1";
+const THEME_KEY = "oraciones_ocultar_botones_theme_v1";
+const SIZE_KEY = "oraciones_ocultar_botones_reader_size_v1";
 
 let readerSize = parseInt(localStorage.getItem(SIZE_KEY) || "24", 10);
 let state = { currentId: null, items: [] };
@@ -245,6 +252,7 @@ function openReader() {
   document.getElementById("readerView").classList.remove("hidden");
   document.getElementById("editorView").classList.add("hidden");
   document.body.classList.remove("fullscreen-reading");
+  document.body.classList.remove("hide-reading-ui");
   if (window.innerWidth <= 860) {
     document.body.classList.add("reading-mobile");
   } else {
@@ -257,12 +265,18 @@ function enterFullscreenReading() {
   document.getElementById("editorView").classList.add("hidden");
   document.body.classList.add("fullscreen-reading");
   document.body.classList.remove("reading-mobile");
+  document.body.classList.remove("hide-reading-ui");
   window.scrollTo({ top: 0, behavior: "smooth" });
   toast("Pantalla completa");
 }
 function exitFullscreenReading() {
   document.body.classList.remove("fullscreen-reading");
+  document.body.classList.remove("hide-reading-ui");
   openReader();
+}
+function toggleReadingUI(event) {
+  if (!document.body.classList.contains("fullscreen-reading")) return;
+  document.body.classList.toggle("hide-reading-ui");
 }
 function openEditor() {
   const item = currentPrayer();
@@ -273,6 +287,7 @@ function openEditor() {
   document.getElementById("readerView").classList.add("hidden");
   document.body.classList.remove("reading-mobile");
   document.body.classList.remove("fullscreen-reading");
+  document.body.classList.remove("hide-reading-ui");
   toast("Modo edición");
 }
 function saveAndBack() {
@@ -287,9 +302,7 @@ function saveAndBack() {
   openReader();
   toast("Guardado");
 }
-function cancelEdit() {
-  openReader();
-}
+function cancelEdit() { openReader(); }
 function newPrayer() {
   const id = uid();
   state.items.unshift({ id: id, title: "Nueva oración", content: "", updatedAt: Date.now() });
@@ -334,6 +347,7 @@ function changeReaderSize(delta) {
 function openList() {
   document.body.classList.remove("reading-mobile");
   document.body.classList.remove("fullscreen-reading");
+  document.body.classList.remove("hide-reading-ui");
   document.getElementById("search").focus();
   toast("Lista abierta");
 }
