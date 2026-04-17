@@ -4,538 +4,116 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Oraciones</title>
-<link rel="manifest" href="manifest.json?v=instalable_pro_v1_cc8652b249">
+<link rel="manifest" href="manifest.json?v=todo_cc8652b249">
 <meta name="theme-color" content="#111111">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Oraciones">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=instalable_pro_v1_cc8652b249">
-<link rel="apple-touch-icon" href="icon-192.png?v=instalable_pro_v1_cc8652b249">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=todo_cc8652b249">
+<link rel="apple-touch-icon" href="icon-192.png?v=todo_cc8652b249">
 <style>
-:root {
-  --bg:#f8f6f1; --card:#ffffff; --text:#181818; --muted:#6b665d; --line:#e5dece;
-  --primary:#8a5a2b; --soft:#efe7da; --danger:#b84a3c; --accent:#c59763;
-}
-body.dark {
-  --bg:#111111; --card:#1a1a1a; --text:#f2eee7; --muted:#b5ab9c; --line:#2f2a24;
-  --primary:#c89763; --soft:#24211d; --danger:#d56d61; --accent:#ffd27d;
-}
-* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html, body { margin:0; min-height:100%; }
-body { font-family: Arial, sans-serif; background:var(--bg); color:var(--text); }
-button, input, textarea { font-family: inherit; }
-
-.topbar {
-  position:sticky; top:0; z-index:40; padding:calc(8px + env(safe-area-inset-top)) 10px 8px;
-  background:rgba(248,246,241,.96); backdrop-filter: blur(10px); border-bottom:1px solid var(--line);
-}
-body.dark .topbar { background:rgba(17,17,17,.96); }
-.topbar-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-.btn { border:none; border-radius:14px; padding:10px 12px; font-size:14px; cursor:pointer; }
-.btn.primary { background:var(--primary); color:#fff; }
-.btn.soft { background:var(--soft); color:var(--text); }
-.btn.danger { background:var(--danger); color:#fff; }
-.search {
-  flex:1; min-width:180px; border:1px solid var(--line); background:var(--card);
-  color:var(--text); border-radius:14px; padding:10px 12px; font-size:15px;
-}
-.main { display:grid; grid-template-columns:300px 1fr; min-height:calc(100dvh - 68px); }
-.sidebar { border-right:1px solid var(--line); overflow:auto; background:var(--bg); padding:10px; }
-.list { display:flex; flex-direction:column; gap:8px; }
-.item { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px; cursor:pointer; }
-.item.active { outline:2px solid var(--primary); }
-.item-title-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.item-title { font-weight:bold; margin-bottom:4px; }
-.item-sub { color:var(--muted); font-size:13px; }
-.fav { color:var(--accent); font-size:18px; }
-.content { min-width:0; overflow:auto; padding:12px; }
-
-.reader, .editor, .backup-panel {
-  background:var(--card); border:1px solid var(--line); border-radius:20px;
-  min-height:calc(100dvh - 92px); display:flex; flex-direction:column; overflow:hidden;
-}
-.reader-head, .editor-head, .backup-head {
-  position:sticky; top:0; z-index:3; display:flex; gap:8px; flex-wrap:wrap; padding:10px;
-  border-bottom:1px solid var(--line); background:var(--card);
-  transition:opacity .2s, transform .2s;
-}
-.reader-title { font-size:24px; font-weight:bold; padding:16px 18px 0; }
-.reader-text { white-space:pre-wrap; padding:18px 18px 40px; font-size:24px; line-height:2.05; }
-.title-input {
-  width:100%; border:none; border-bottom:1px solid var(--line); outline:none;
-  background:var(--card); color:var(--text); font-size:22px; font-weight:bold; padding:14px 16px;
-}
-.text-input, .backup-text {
-  flex:1; width:100%; border:none; outline:none; resize:none; background:var(--card);
-  color:var(--text); font-size:18px; line-height:1.7; padding:18px; min-height:50dvh;
-}
-.hidden { display:none !important; }
-.empty { color:var(--muted); padding:18px; }
-.toast {
-  position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:#111; color:#fff;
-  padding:10px 14px; border-radius:999px; font-size:14px; opacity:0; pointer-events:none; transition:opacity .2s; z-index:90;
-}
-.toast.show { opacity:1; }
-
-.fullscreen-reading .topbar,
-.fullscreen-reading .sidebar { display:none !important; }
-.fullscreen-reading .main { grid-template-columns:1fr; min-height:100dvh; }
-.fullscreen-reading .content { padding:0; }
-.fullscreen-reading .reader { border:none; border-radius:0; min-height:100dvh; }
-.fullscreen-reading .reader-head {
-  position:sticky; top:0; padding:calc(8px + env(safe-area-inset-top)) 10px 8px; border-radius:0;
-}
-.fullscreen-reading .reader-title { font-size:22px; padding:14px 16px 0; }
-.fullscreen-reading .reader-text { font-size:25px; line-height:2.1; padding:16px 16px 48px; min-height:100dvh; }
-.fullscreen-reading.hide-reading-ui .reader-head {
-  opacity:0; pointer-events:none; transform:translateY(-12px);
-}
-
-.lock-screen {
-  position:fixed; inset:0; z-index:120; background:var(--bg); color:var(--text);
-  display:flex; align-items:center; justify-content:center; padding:20px;
-}
-.lock-card {
-  width:min(420px, 100%); background:var(--card); border:1px solid var(--line);
-  border-radius:24px; padding:20px; text-align:center;
-}
-.lock-title { font-size:24px; font-weight:bold; margin-bottom:8px; }
-.lock-sub { color:var(--muted); margin-bottom:16px; }
-.lock-input {
-  width:100%; padding:14px; border-radius:14px; border:1px solid var(--line);
-  background:var(--bg); color:var(--text); font-size:22px; text-align:center; letter-spacing:4px;
-}
-.row { display:flex; gap:8px; flex-wrap:wrap; }
-.small-note { color:var(--muted); font-size:13px; padding:0 18px 18px; }
-
-.install-banner {
-  position:fixed; left:10px; right:10px; bottom:10px; z-index:100;
-  background:var(--card); border:1px solid var(--line); border-radius:18px;
-  padding:12px; box-shadow:0 8px 24px rgba(0,0,0,.18);
-}
-.install-title { font-weight:bold; margin-bottom:6px; }
-.install-sub { color:var(--muted); font-size:13px; margin-bottom:10px; }
-
-@media (max-width:860px) {
-  .main { grid-template-columns:1fr; }
-  .sidebar { display:block; border-right:none; border-bottom:1px solid var(--line); max-height:34dvh; }
-  body.reading-mobile .sidebar { display:none; }
-  .content { padding:0; }
-  .reader, .editor, .backup-panel { border:none; border-radius:0; min-height:calc(100dvh - 62px); }
-  .reader-head, .editor-head, .backup-head { padding:8px; border-radius:0; }
-  .reader-title { font-size:22px; padding:14px 16px 0; }
-  .reader-text { font-size:23px; line-height:2; padding:16px 16px 34px; }
-  .text-input, .backup-text { font-size:18px; line-height:1.7; min-height:56dvh; }
-  .search { order:2; width:100%; flex-basis:100%; }
-}
+:root{--bg:#f8f6f1;--card:#fff;--text:#181818;--muted:#6b665d;--line:#e5dece;--primary:#8a5a2b;--soft:#efe7da;--danger:#b84a3c;--accent:#c59763}
+body.dark{--bg:#111;--card:#1a1a1a;--text:#f2eee7;--muted:#b5ab9c;--line:#2f2a24;--primary:#c89763;--soft:#24211d;--danger:#d56d61;--accent:#ffd27d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%}body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}button,input,textarea{font-family:inherit}
+.topbar{position:sticky;top:0;z-index:40;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;background:rgba(248,246,241,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}body.dark .topbar{background:rgba(17,17,17,.96)}
+.topbar-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.btn{border:none;border-radius:14px;padding:10px 12px;font-size:14px;cursor:pointer}.btn.primary{background:var(--primary);color:#fff}.btn.soft{background:var(--soft);color:var(--text)}.btn.danger{background:var(--danger);color:#fff}
+.search{flex:1;min-width:180px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:14px;padding:10px 12px;font-size:15px}
+.main{display:grid;grid-template-columns:300px 1fr;min-height:calc(100dvh - 68px)}.sidebar{border-right:1px solid var(--line);overflow:auto;background:var(--bg);padding:10px}.list{display:flex;flex-direction:column;gap:8px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;cursor:pointer}.item.active{outline:2px solid var(--primary)}.item-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.item-title{font-weight:bold;margin-bottom:4px}.item-sub{color:var(--muted);font-size:13px}.fav{color:var(--accent);font-size:18px}
+.content{min-width:0;overflow:auto;padding:12px}.reader,.editor,.backup-panel{background:var(--card);border:1px solid var(--line);border-radius:20px;min-height:calc(100dvh - 92px);display:flex;flex-direction:column;overflow:hidden}
+.reader-head,.editor-head,.backup-head{position:sticky;top:0;z-index:3;display:flex;gap:8px;flex-wrap:wrap;padding:10px;border-bottom:1px solid var(--line);background:var(--card);transition:opacity .2s,transform .2s}
+.reader-title{font-size:24px;font-weight:bold;padding:16px 18px 0}.reader-text{white-space:pre-wrap;padding:18px 18px 40px;font-size:24px;line-height:2.05}
+.title-input{width:100%;border:none;border-bottom:1px solid var(--line);outline:none;background:var(--card);color:var(--text);font-size:22px;font-weight:bold;padding:14px 16px}
+.text-input,.backup-text{flex:1;width:100%;border:none;outline:none;resize:none;background:var(--card);color:var(--text);font-size:18px;line-height:1.7;padding:18px;min-height:50dvh}
+.hidden{display:none!important}.empty{color:var(--muted);padding:18px}.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:95}.toast.show{opacity:1}
+.fullscreen-reading .topbar,.fullscreen-reading .sidebar{display:none!important}.fullscreen-reading .main{grid-template-columns:1fr;min-height:100dvh}.fullscreen-reading .content{padding:0}.fullscreen-reading .reader{border:none;border-radius:0;min-height:100dvh}.fullscreen-reading .reader-head{position:sticky;top:0;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;border-radius:0}.fullscreen-reading .reader-title{font-size:22px;padding:14px 16px 0}.fullscreen-reading .reader-text{font-size:25px;line-height:2.1;padding:16px 16px 48px;min-height:100dvh}.fullscreen-reading.hide-reading-ui .reader-head{opacity:0;pointer-events:none;transform:translateY(-12px)}
+.lock-screen{position:fixed;inset:0;z-index:120;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;padding:20px}.lock-card{width:min(420px,100%);background:var(--card);border:1px solid var(--line);border-radius:24px;padding:20px;text-align:center}.lock-title{font-size:24px;font-weight:bold;margin-bottom:8px}.lock-sub{color:var(--muted);margin-bottom:16px}.lock-input{width:100%;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:22px;text-align:center;letter-spacing:4px}
+.install-banner{position:fixed;left:10px;right:10px;bottom:10px;z-index:100;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}.install-title{font-weight:bold;margin-bottom:6px}.install-sub{color:var(--muted);font-size:13px;margin-bottom:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap}.small-note{color:var(--muted);font-size:13px;padding:0 18px 18px}
+@media (max-width:860px){.main{grid-template-columns:1fr}.sidebar{display:block;border-right:none;border-bottom:1px solid var(--line);max-height:34dvh}body.reading-mobile .sidebar{display:none}.content{padding:0}.reader,.editor,.backup-panel{border:none;border-radius:0;min-height:calc(100dvh - 62px)}.reader-head,.editor-head,.backup-head{padding:8px;border-radius:0}.reader-title{font-size:22px;padding:14px 16px 0}.reader-text{font-size:23px;line-height:2;padding:16px 16px 34px}.text-input,.backup-text{font-size:18px;line-height:1.7;min-height:56dvh}.search{order:2;width:100%;flex-basis:100%}}
 </style>
 </head>
 <body>
-<div id="lockScreen" class="lock-screen hidden">
-  <div class="lock-card">
-    <div class="lock-title">🔒 App protegida</div>
-    <div class="lock-sub">Introduce tu PIN para entrar</div>
-    <input id="lockPinInput" class="lock-input" type="password" inputmode="numeric" maxlength="8" placeholder="••••">
-    <div style="height:12px"></div>
-    <div class="row" style="justify-content:center">
-      <button class="btn primary" onclick="unlockApp()">Entrar</button>
-      <button class="btn soft" onclick="skipLockIfNone()">Cancelar</button>
-    </div>
-    <div id="lockError" class="small-note"></div>
-  </div>
-</div>
+<div id="lockScreen" class="lock-screen hidden"><div class="lock-card"><div class="lock-title">🔒 App protegida</div><div class="lock-sub">Introduce tu PIN para entrar</div><input id="lockPinInput" class="lock-input" type="password" inputmode="numeric" maxlength="8" placeholder="••••"><div style="height:12px"></div><div class="row" style="justify-content:center"><button class="btn primary" onclick="unlockApp()">Entrar</button><button class="btn soft" onclick="skipLockIfNone()">Cancelar</button></div><div id="lockError" class="small-note"></div></div></div>
+<div id="installBanner" class="install-banner hidden"><div class="install-title">Instalar app</div><div class="install-sub">Puedes instalarla para abrirla como app real desde tu móvil.</div><div class="row"><button class="btn primary" id="installBtn">Instalar</button><button class="btn soft" onclick="dismissInstall()">Ahora no</button></div></div>
 
-<div id="installBanner" class="install-banner hidden">
-  <div class="install-title">Instalar app</div>
-  <div class="install-sub">Puedes instalarla para abrirla como app real desde tu móvil.</div>
-  <div class="row">
-    <button class="btn primary" id="installBtn">Instalar</button>
-    <button class="btn soft" onclick="dismissInstall()">Ahora no</button>
-  </div>
-</div>
+<div class="topbar"><div class="topbar-row">
+<button class="btn primary" onclick="newPrayer()">➕ Nueva</button>
+<button class="btn soft" onclick="enterFullscreenReading()">📖 Leer</button>
+<button class="btn soft" onclick="openEditor()">✍️ Editar</button>
+<button class="btn soft" onclick="toggleFavorite()">⭐ Favorita</button>
+<button class="btn soft" onclick="openBackup()">☁️ Backup</button>
+<button class="btn soft" onclick="toggleTheme()">🌙</button>
+<button class="btn danger" onclick="deletePrayer()">🗑️</button>
+<button class="btn soft" onclick="resetApp()">♻️ Reset</button>
+<input id="search" class="search" placeholder="Buscar oración..." oninput="renderList()">
+</div></div>
 
-<div class="topbar">
-  <div class="topbar-row">
-    <button class="btn primary" onclick="newPrayer()">➕ Nueva</button>
-    <button class="btn soft" onclick="enterFullscreenReading()">📖 Leer</button>
-    <button class="btn soft" onclick="openEditor()">✍️ Editar</button>
-    <button class="btn soft" onclick="toggleFavorite()">⭐ Favorita</button>
-    <button class="btn soft" onclick="openBackup()">☁️ Backup</button>
-    <button class="btn soft" onclick="toggleTheme()">🌙</button>
-    <button class="btn danger" onclick="deletePrayer()">🗑️</button>
-    <button class="btn soft" onclick="resetApp()">♻️ Reset</button>
-    <input id="search" class="search" placeholder="Buscar oración..." oninput="renderList()">
-  </div>
-</div>
+<div class="main"><aside class="sidebar"><div id="list" class="list"></div></aside><section class="content">
+<div id="readerView" class="reader"><div id="readerHead" class="reader-head">
+<button class="btn soft" onclick="exitFullscreenReading(); event.stopPropagation();">← Volver</button>
+<button class="btn soft" onclick="openList(); event.stopPropagation();">☰ Lista</button>
+<button class="btn soft" onclick="openEditor(); event.stopPropagation();">✍️ Editar</button>
+<button class="btn soft" onclick="changeReaderSize(-1); event.stopPropagation();">A-</button>
+<button class="btn soft" onclick="changeReaderSize(1); event.stopPropagation();">A+</button>
+<button class="btn soft" onclick="copyPrayer(); event.stopPropagation();">📋 Copiar</button>
+<button class="btn soft" onclick="toggleFavorite(); event.stopPropagation();">⭐</button>
+</div><div id="readerTitle" class="reader-title"></div><div id="readerText" class="reader-text" onclick="toggleReadingUI()"></div></div>
 
-<div class="main">
-  <aside class="sidebar">
-    <div id="list" class="list"></div>
-  </aside>
+<div id="editorView" class="editor hidden"><div class="editor-head"><button class="btn primary" onclick="saveAndBack()">💾 Guardar y volver</button><button class="btn soft" onclick="cancelEdit()">← Volver</button></div><input id="editTitle" class="title-input" placeholder="Título de la oración"><textarea id="editText" class="text-input" placeholder="Escribe aquí tu oración..."></textarea></div>
 
-  <section class="content">
-    <div id="readerView" class="reader">
-      <div id="readerHead" class="reader-head">
-        <button class="btn soft" onclick="exitFullscreenReading(); event.stopPropagation();">← Volver</button>
-        <button class="btn soft" onclick="openList(); event.stopPropagation();">☰ Lista</button>
-        <button class="btn soft" onclick="openEditor(); event.stopPropagation();">✍️ Editar</button>
-        <button class="btn soft" onclick="changeReaderSize(-1); event.stopPropagation();">A-</button>
-        <button class="btn soft" onclick="changeReaderSize(1); event.stopPropagation();">A+</button>
-        <button class="btn soft" onclick="copyPrayer(); event.stopPropagation();">📋 Copiar</button>
-        <button class="btn soft" onclick="toggleFavorite(); event.stopPropagation();">⭐</button>
-      </div>
-      <div id="readerTitle" class="reader-title"></div>
-      <div id="readerText" class="reader-text" onclick="toggleReadingUI(event)"></div>
-    </div>
-
-    <div id="editorView" class="editor hidden">
-      <div class="editor-head">
-        <button class="btn primary" onclick="saveAndBack()">💾 Guardar y volver</button>
-        <button class="btn soft" onclick="cancelEdit()">← Volver</button>
-      </div>
-      <input id="editTitle" class="title-input" placeholder="Título de la oración">
-      <textarea id="editText" class="text-input" placeholder="Escribe aquí tu oración..."></textarea>
-    </div>
-
-    <div id="backupView" class="backup-panel hidden">
-      <div class="backup-head">
-        <button class="btn soft" onclick="closeBackup()">← Volver</button>
-        <button class="btn primary" onclick="exportBackup()">⬇ Exportar</button>
-        <button class="btn soft" onclick="importBackup()">⬆ Importar</button>
-        <button class="btn soft" onclick="setPin()">🔒 PIN</button>
-        <button class="btn danger" onclick="removePin()">🔓 Quitar PIN</button>
-      </div>
-      <textarea id="backupText" class="backup-text" placeholder="Aquí aparecerá tu copia de seguridad. También puedes pegar aquí una copia para importar."></textarea>
-      <div class="small-note">Exportar genera un texto con todas tus oraciones. Guárdalo fuera del móvil. Importar reemplaza todo por el contenido pegado aquí.</div>
-    </div>
-  </section>
-</div>
+<div id="backupView" class="backup-panel hidden"><div class="backup-head"><button class="btn soft" onclick="closeBackup()">← Volver</button><button class="btn primary" onclick="exportBackup()">⬇ Exportar</button><button class="btn soft" onclick="importBackup()">⬆ Importar</button><button class="btn soft" onclick="setPin()">🔒 PIN</button><button class="btn danger" onclick="removePin()">🔓 Quitar PIN</button></div><textarea id="backupText" class="backup-text" placeholder="Aquí aparecerá tu copia de seguridad. También puedes pegar aquí una copia para importar."></textarea><div class="small-note">Exportar descarga un archivo .json, copia el contenido y también intenta abrir compartir.</div></div>
+</section></div>
 
 <div id="toast" class="toast">Guardado</div>
 
 <script>
-const APP_VERSION = "instalable_pro_v1_cc8652b249";
-const STORAGE_KEY = "oraciones_instalable_pro_v1";
-const THEME_KEY = "oraciones_instalable_pro_theme_v1";
-const SIZE_KEY = "oraciones_instalable_pro_reader_size_v1";
-const PIN_KEY = "oraciones_instalable_pro_pin_v1";
-const INSTALL_DISMISSED_KEY = "oraciones_instalable_pro_install_dismissed_v1";
-
-let deferredPrompt = null;
-let readerSize = parseInt(localStorage.getItem(SIZE_KEY) || "24", 10);
-let state = { currentId: null, items: [] };
-const textoInicial = "\ud83c\udf05 \u271d\ufe0f Oraci\u00f3n diaria completa\n\nSe\u00f1or Dios Todopoderoso,\ndamos gracias por este nuevo d\u00eda que me concede.\n\nDamos gracias por la vida que me ha dado,\npor el regalo de la vida, desde la creaci\u00f3n y el nacimiento,\nhasta el regalo de la vida eterna.\n\nPor ser el centro de mi vida,\npor llevar las riendas de mi vida\ny darle sentido.\n\nDamos gracias por hacerme sentir grande y querido por usted, en este mundo que me hace sentir peque\u00f1o e insignificante,\naunque eso no me importa,\nporque todo lo que deseo es agradarle a usted.\n\nToda mi vida gira en torno a usted con su perfecto amor.\nSin usted, la vida no tendr\u00eda sentido.\n\nDamos gracias por la familia tan maravillosa que me ha dado:\npor el hijo tan maravilloso, honrado y humilde que me ha ofrecido.\n\nMe encanta que su coraz\u00f3n se sienta atra\u00eddo por usted y se interese en conocerle, a su manera y a su debido tiempo, porque cada uno tiene su propio camino hacia usted seg\u00fan su voluntad.\n\nYa me gustar\u00eda haber sido la mitad de lo que es \u00e9l cuando yo ten\u00eda su edad.\n\nDamos gracias por la mujer que me ha ofrecido, tan maravillosa y querida, y por la paciencia que tiene conmigo.\nTantos a\u00f1os juntos y contin\u00faa a mi lado; es una bendici\u00f3n.\nDamos gracias por ponerla en mi vida, porque tiene un gran coraz\u00f3n.\n\nDamos gracias por ser la luz, mi gu\u00eda, mi instructor, mi maestro, mi amor; quien me acompa\u00f1a all\u00e1 donde voy.\n\nLe pido que derrame su amor sobre m\u00ed, para que yo pueda transmitirlo a mi familia.\n\nDamos gracias por darme todo esto, para tratar de ser ejemplo para mi familia e intentar acercarles a usted, aunque s\u00e9 que cada uno tiene su propio camino hacia usted seg\u00fan su voluntad.\n\nBendiga y proteja a mi madre, hermana, cu\u00f1ados, suegros y sobrinos, manteni\u00e9ndolos bendecidos en este nuevo d\u00eda.\n\nDamos gracias por el trabajo que nos ha ofrecido,\npor el cual tenemos cubiertas nuestras necesidades:\nno nos falta un techo ni comida,\ny podemos cubrir lo necesario e incluso nos ofrece algunos caprichos.\n\nSolo le pido que podamos conservarlo y mantenerlo,\nnos encantar\u00eda poder jubilarnos en \u00e9l;\naunque, sobre todo, aceptamos su voluntad.\n\nDamos gracias porque me ofrece justo lo que mi alma necesita y lo que le pido;\nsiento que, con lo que me concede, me gu\u00eda a vivir conforme a su voluntad,\ny por ello le estoy agradecido.\n\nLa paz que usted me da no tiene palabras; es indescriptible.\nNo puedo expresar con palabras la paz que usted me ofrece, y me libera de toda ansiedad.\n\nDamos gracias por esta vida bendecida.\n\nJah, Jehov\u00e1, Yahv\u00e9, Emmanuel Dios con nosotros, Adonai, Elohim, Jesucristo, Cristo Jes\u00fas, nuestro Padre celestial, nuestro padre terrenal.\n\nAquel que nos cuida, nos protege y nos mima,\naquel que nos ofrece todas nuestras peticiones,\naquel que nos pastorea;\naquel que fue y es el padre que no he tenido,\naquel que siempre me habl\u00f3 al o\u00eddo y me aconsej\u00f3,\naquel que aun habi\u00e9ndome equivocado muchas veces estuvo ah\u00ed y me perdon\u00f3,\naquel que me ofrece cada d\u00eda nuevas oportunidades,\naquel que es mi Salvador, mi Dios, Cristo Jes\u00fas.\n\nUsted es nuestro Pastor y nosotros su reba\u00f1o.\nSi hoy nos equivocamos, corr\u00edjanos con su vara;\nsi caemos en el agujero o tropezamos con la piedra en el camino \u2014sea puesta por otros o por nosotros mismos\u2014\ns\u00e1quenos con su cayado, porque usted es nuestro Pastor.\n\nLe pido que derrame su bendici\u00f3n sobre m\u00ed y sobre toda mi familia.\nBend\u00edganos con su misericordia, gu\u00edenos con su luz y ens\u00e9\u00f1enos a caminar en sus caminos.\nQue todo lo que hagamos sea agradable delante de usted.\nPor su gracia, bend\u00edganos este d\u00eda.\n\nDamos gracias por perdonarnos y darnos oportunidades todos los d\u00edas.\n\nQue reine siempre en nuestro coraz\u00f3n, para que nuestras decisiones sean aceptables a usted\ny podamos andar por el camino que hoy nos tiene preparado.\n\nGobierne en nuestra mente para que nuestros pensamientos y palabras sean agradables a usted.\n\nDeseo que nuestros hechos, obras y acciones sean agradables a usted.\n\nSe\u00f1or,\nle pido que santifique y mantenga puro nuestro esp\u00edritu, libre de pecado, para que podamos serle agradables y alcanzar la vida eterna en la Nueva Jerusal\u00e9n.\n\nQue gobierne en nuestro interior, para que nuestras decisiones, pensamientos y sentimientos est\u00e9n conforme a su voluntad y podamos caminar por el camino que nos tiene preparado.\n\nCuide, bendiga y proteja nuestro cuerpo con salud, para que podamos disfrutar con gratitud de los dones y regalos de la vida que nos da cada d\u00eda.\n\nSe\u00f1or, mi mayor deseo usted lo conoce: que podamos ser santos para usted, libres de pecado, para que podamos ser inscritos en el libro de la vida y que nos d\u00e9 un lugar en el reino de los cielos, en la Nueva Jerusal\u00e9n, para que mi familia y yo podamos vivir eternamente juntos junto a usted en perfecto amor siempre.\n\nMientras tanto, se\u00f1or, le pido mi petici\u00f3n m\u00e1s deseada aqu\u00ed en la vida carnal: le pido que nos ofrezca salud para que mi mujer y yo podamos llegar a ser viejitos, ver hacerse un hombre a nuestro hijo, sano y fuerte, conocer a su mujer y poder ver nacer, crecer y jugar a nuestros nietos.\n\nEse es el regalo m\u00e1s preciado que nos puede ofrecer aqu\u00ed en la tierra carnal, poder contemplarlo con nuestro ser ser\u00eda maravilloso. Ojal\u00e1 sea su voluntad ofrecernos estas cosas, pero dejamos en sus manos nuestras vidas y, sobre todo, aceptamos que su voluntad sea hecha.\n\nSe\u00f1or, sabemos que vivimos en un mundo de libertad y regido por leyes naturales, pero le pedimos que nos mantenga alejados de las adversidades, peligros, injusticias y de la gente malvada del mundo. Confiamos en que nos mantenga protegidos y dejamos nuestras vidas en sus manos, pero sobre todo aceptamos que su voluntad sea hecha.\n\n\ud83d\ude4f Padre Nuestro  \n\ud83d\udd4a\ufe0f Gloria al Padre\n\nConf\u00edo en que mis oraciones y peticiones han sido escuchadas por usted, quien nos concede estos momentos de oraci\u00f3n. Am\u00e9n.";
-
-function toast(msg) {
-  const el = document.getElementById("toast");
-  el.textContent = msg;
-  el.classList.add("show");
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(() => el.classList.remove("show"), 1300);
-}
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
-function buildInitialState() {
-  const id = uid();
-  return {
-    currentId: id,
-    items: [{ id: id, title: "🌅 ✝️ Oración diaria completa", content: textoInicial, updatedAt: Date.now(), favorite: true }]
-  };
-}
-function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) {
-    try {
-      state = JSON.parse(raw);
-      if (!state || !Array.isArray(state.items) || !state.currentId) throw new Error("bad");
-    } catch(e) {
-      state = buildInitialState();
-      saveState();
-    }
-  } else {
-    state = buildInitialState();
-    saveState();
-  }
-}
-function currentPrayer() { return state.items.find(x => x.id === state.currentId) || state.items[0] || null; }
-function escapeHtml(str) {
-  return str.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-}
-function renderList() {
-  const q = document.getElementById("search").value.trim().toLowerCase();
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-  const items = [...state.items]
-    .sort((a,b) => (b.favorite===true)-(a.favorite===true) || b.updatedAt - a.updatedAt)
-    .filter(item => item.title.toLowerCase().includes(q) || item.content.toLowerCase().includes(q));
-  if (!items.length) {
-    list.innerHTML = '<div class="empty">No hay resultados.</div>';
-    return;
-  }
-  items.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "item" + (item.id === state.currentId ? " active" : "");
-    const preview = item.content.trim().replace(/\n+/g, " ").slice(0, 70) || "Sin contenido";
-    div.innerHTML =
-      '<div class="item-title-row"><div class="item-title">' + escapeHtml(item.title || "Sin título") + '</div>' +
-      '<div class="fav">' + (item.favorite ? '⭐' : '') + '</div></div>' +
-      '<div class="item-sub">' + escapeHtml(preview) + '</div>';
-    div.onclick = () => selectPrayer(item.id);
-    list.appendChild(div);
-  });
-}
-function renderReader() {
-  const item = currentPrayer();
-  if (!item) return;
-  document.getElementById("readerTitle").textContent = item.favorite ? '⭐ ' + item.title : item.title;
-  document.getElementById("readerText").textContent = item.content;
-  document.getElementById("readerText").style.fontSize = readerSize + "px";
-}
-function selectPrayer(id) {
-  state.currentId = id;
-  saveState();
-  renderList();
-  renderReader();
-  openReader();
-}
-function openReader() {
-  document.getElementById("readerView").classList.remove("hidden");
-  document.getElementById("editorView").classList.add("hidden");
-  document.getElementById("backupView").classList.add("hidden");
-  document.body.classList.remove("fullscreen-reading");
-  document.body.classList.remove("hide-reading-ui");
-  if (window.innerWidth <= 860) document.body.classList.add("reading-mobile");
-  else document.body.classList.remove("reading-mobile");
-}
-function enterFullscreenReading() {
-  document.getElementById("readerView").classList.remove("hidden");
-  document.getElementById("editorView").classList.add("hidden");
-  document.getElementById("backupView").classList.add("hidden");
-  document.body.classList.add("fullscreen-reading");
-  document.body.classList.remove("reading-mobile");
-  document.body.classList.remove("hide-reading-ui");
-  window.scrollTo({ top: 0, behavior: "smooth" });
-  toast("Pantalla completa");
-}
-function exitFullscreenReading() {
-  document.body.classList.remove("fullscreen-reading");
-  document.body.classList.remove("hide-reading-ui");
-  openReader();
-}
-function toggleReadingUI(event) {
-  if (!document.body.classList.contains("fullscreen-reading")) return;
-  document.body.classList.toggle("hide-reading-ui");
-}
-function openEditor() {
-  const item = currentPrayer();
-  if (!item) return;
-  document.getElementById("editTitle").value = item.title;
-  document.getElementById("editText").value = item.content;
-  document.getElementById("editorView").classList.remove("hidden");
-  document.getElementById("readerView").classList.add("hidden");
-  document.getElementById("backupView").classList.add("hidden");
-  document.body.classList.remove("reading-mobile", "fullscreen-reading", "hide-reading-ui");
-  toast("Modo edición");
-}
-function saveAndBack() {
-  const item = currentPrayer();
-  if (!item) return;
-  item.title = document.getElementById("editTitle").value.trim() || "Sin título";
-  item.content = document.getElementById("editText").value;
-  item.updatedAt = Date.now();
-  saveState();
-  renderList();
-  renderReader();
-  openReader();
-  toast("Guardado");
-}
-function cancelEdit() { openReader(); }
-function newPrayer() {
-  const id = uid();
-  state.items.unshift({ id: id, title: "Nueva oración", content: "", updatedAt: Date.now(), favorite: false });
-  state.currentId = id;
-  saveState();
-  renderList();
-  renderReader();
-  openEditor();
-}
-function deletePrayer() {
-  const item = currentPrayer();
-  if (!item) return;
-  if (state.items.length === 1) return alert("Debe quedar al menos una oración.");
-  if (!confirm('¿Borrar "' + item.title + '"?')) return;
-  state.items = state.items.filter(x => x.id !== item.id);
-  state.currentId = state.items[0].id;
-  saveState();
-  renderList();
-  renderReader();
-  openReader();
-  toast("Borrada");
-}
-function copyPrayer() {
-  const item = currentPrayer();
-  if (!item) return;
-  navigator.clipboard.writeText(item.content).then(() => toast("Oración copiada")).catch(() => alert("No se pudo copiar."));
-}
-function toggleFavorite() {
-  const item = currentPrayer();
-  if (!item) return;
-  item.favorite = !item.favorite;
-  item.updatedAt = Date.now();
-  saveState();
-  renderList();
-  renderReader();
-  toast(item.favorite ? "Marcada como favorita" : "Quitada de favoritas");
-}
-function toggleTheme() {
-  document.body.classList.toggle("dark");
-  localStorage.setItem(THEME_KEY, document.body.classList.contains("dark") ? "dark" : "light");
-}
-function applyTheme() {
-  if (localStorage.getItem(THEME_KEY) === "dark") document.body.classList.add("dark");
-}
-function changeReaderSize(delta) {
-  readerSize += delta;
-  if (readerSize < 20) readerSize = 20;
-  if (readerSize > 34) readerSize = 34;
-  localStorage.setItem(SIZE_KEY, String(readerSize));
-  renderReader();
-}
-function openList() {
-  document.body.classList.remove("reading-mobile", "fullscreen-reading", "hide-reading-ui");
-  document.getElementById("search").focus();
-  toast("Lista abierta");
-}
-function openBackup() {
-  document.getElementById("backupView").classList.remove("hidden");
-  document.getElementById("readerView").classList.add("hidden");
-  document.getElementById("editorView").classList.add("hidden");
-  document.body.classList.remove("reading-mobile", "fullscreen-reading", "hide-reading-ui");
-  toast("Panel backup");
-}
-function closeBackup() { openReader(); }
-function exportBackup() {
-  const payload = { exportedAt: new Date().toISOString(), items: state.items, currentId: state.currentId };
-  const text = JSON.stringify(payload, null, 2);
-  document.getElementById("backupText").value = text;
-  navigator.clipboard.writeText(text).then(() => toast("Backup copiado")).catch(() => toast("Backup generado"));
-}
-function importBackup() {
-  const text = document.getElementById("backupText").value.trim();
-  if (!text) return alert("Pega primero una copia de seguridad.");
-  try {
-    const parsed = JSON.parse(text);
-    if (!parsed.items || !Array.isArray(parsed.items) || !parsed.items.length) throw new Error("bad");
-    state = {
-      items: parsed.items.map(x => ({
-        id: x.id || uid(),
-        title: x.title || "Sin título",
-        content: x.content || "",
-        updatedAt: x.updatedAt || Date.now(),
-        favorite: !!x.favorite
-      })),
-      currentId: parsed.currentId || parsed.items[0].id
-    };
-    saveState();
-    renderList();
-    renderReader();
-    openReader();
-    toast("Backup importado");
-  } catch(e) {
-    alert("La copia no es válida.");
-  }
-}
-function setPin() {
-  const pin = prompt("Escribe un PIN numérico de 4 a 8 cifras:");
-  if (!pin) return;
-  if (!/^\d{4,8}$/.test(pin)) return alert("Debe tener entre 4 y 8 números.");
-  localStorage.setItem(PIN_KEY, pin);
-  toast("PIN guardado");
-}
-function removePin() {
-  if (!localStorage.getItem(PIN_KEY)) return alert("No hay PIN activo.");
-  if (!confirm("¿Quitar el PIN de la app?")) return;
-  localStorage.removeItem(PIN_KEY);
-  toast("PIN eliminado");
-}
-function maybeLock() {
-  const pin = localStorage.getItem(PIN_KEY);
-  if (!pin) return;
-  document.getElementById("lockScreen").classList.remove("hidden");
-  setTimeout(() => document.getElementById("lockPinInput").focus(), 50);
-}
-function unlockApp() {
-  const pin = localStorage.getItem(PIN_KEY);
-  const value = document.getElementById("lockPinInput").value;
-  if (!pin) {
-    document.getElementById("lockScreen").classList.add("hidden");
-    return;
-  }
-  if (value === pin) {
-    document.getElementById("lockScreen").classList.add("hidden");
-    document.getElementById("lockError").textContent = "";
-    document.getElementById("lockPinInput").value = "";
-    toast("Desbloqueada");
-  } else {
-    document.getElementById("lockError").textContent = "PIN incorrecto";
-  }
-}
-function skipLockIfNone() {
-  if (!localStorage.getItem(PIN_KEY)) document.getElementById("lockScreen").classList.add("hidden");
-}
-function resetApp() {
-  if (!confirm("Esto reiniciará la app y dejará solo la oración inicial. ¿Continuar?")) return;
-  localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(SIZE_KEY);
-  state = buildInitialState();
-  saveState();
-  renderList();
-  renderReader();
-  openReader();
-  toast("App reiniciada");
-}
-
-function dismissInstall() {
-  localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
-  document.getElementById("installBanner").classList.add("hidden");
-}
-function maybeShowInstall() {
-  if (localStorage.getItem(INSTALL_DISMISSED_KEY) === "1") return;
-  if (deferredPrompt) document.getElementById("installBanner").classList.remove("hidden");
-}
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  maybeShowInstall();
-});
-document.getElementById("installBtn").addEventListener("click", async () => {
-  if (!deferredPrompt) {
-    toast("Abre el menú del navegador y prueba instalar o añadir a inicio");
-    return;
-  }
-  deferredPrompt.prompt();
-  await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  document.getElementById("installBanner").classList.add("hidden");
-});
-window.addEventListener("appinstalled", () => {
-  document.getElementById("installBanner").classList.add("hidden");
-  toast("App instalada");
-});
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js?v=" + APP_VERSION);
-  });
-}
-
-applyTheme();
-loadState();
-renderList();
-renderReader();
-openReader();
-maybeLock();
-maybeShowInstall();
+const APP_VERSION="todo_cc8652b249",STORAGE_KEY="oraciones_todo_integrado_v1",THEME_KEY="oraciones_todo_integrado_theme_v1",SIZE_KEY="oraciones_todo_integrado_reader_size_v1",PIN_KEY="oraciones_todo_integrado_pin_v1",INSTALL_DISMISSED_KEY="oraciones_todo_integrado_install_v1";
+let deferredPrompt=null,readerSize=parseInt(localStorage.getItem(SIZE_KEY)||"24",10),state={currentId:null,items:[]};const textoInicial="\ud83c\udf05 \u271d\ufe0f Oraci\u00f3n diaria completa\n\nSe\u00f1or Dios Todopoderoso,\ndamos gracias por este nuevo d\u00eda que me concede.\n\nDamos gracias por la vida que me ha dado,\npor el regalo de la vida, desde la creaci\u00f3n y el nacimiento,\nhasta el regalo de la vida eterna.\n\nPor ser el centro de mi vida,\npor llevar las riendas de mi vida\ny darle sentido.\n\nDamos gracias por hacerme sentir grande y querido por usted, en este mundo que me hace sentir peque\u00f1o e insignificante,\naunque eso no me importa,\nporque todo lo que deseo es agradarle a usted.\n\nToda mi vida gira en torno a usted con su perfecto amor.\nSin usted, la vida no tendr\u00eda sentido.\n\nDamos gracias por la familia tan maravillosa que me ha dado:\npor el hijo tan maravilloso, honrado y humilde que me ha ofrecido.\n\nMe encanta que su coraz\u00f3n se sienta atra\u00eddo por usted y se interese en conocerle, a su manera y a su debido tiempo, porque cada uno tiene su propio camino hacia usted seg\u00fan su voluntad.\n\nYa me gustar\u00eda haber sido la mitad de lo que es \u00e9l cuando yo ten\u00eda su edad.\n\nDamos gracias por la mujer que me ha ofrecido, tan maravillosa y querida, y por la paciencia que tiene conmigo.\nTantos a\u00f1os juntos y contin\u00faa a mi lado; es una bendici\u00f3n.\nDamos gracias por ponerla en mi vida, porque tiene un gran coraz\u00f3n.\n\nDamos gracias por ser la luz, mi gu\u00eda, mi instructor, mi maestro, mi amor; quien me acompa\u00f1a all\u00e1 donde voy.\n\nLe pido que derrame su amor sobre m\u00ed, para que yo pueda transmitirlo a mi familia.\n\nDamos gracias por darme todo esto, para tratar de ser ejemplo para mi familia e intentar acercarles a usted, aunque s\u00e9 que cada uno tiene su propio camino hacia usted seg\u00fan su voluntad.\n\nBendiga y proteja a mi madre, hermana, cu\u00f1ados, suegros y sobrinos, manteni\u00e9ndolos bendecidos en este nuevo d\u00eda.\n\nDamos gracias por el trabajo que nos ha ofrecido,\npor el cual tenemos cubiertas nuestras necesidades:\nno nos falta un techo ni comida,\ny podemos cubrir lo necesario e incluso nos ofrece algunos caprichos.\n\nSolo le pido que podamos conservarlo y mantenerlo,\nnos encantar\u00eda poder jubilarnos en \u00e9l;\naunque, sobre todo, aceptamos su voluntad.\n\nDamos gracias porque me ofrece justo lo que mi alma necesita y lo que le pido;\nsiento que, con lo que me concede, me gu\u00eda a vivir conforme a su voluntad,\ny por ello le estoy agradecido.\n\nLa paz que usted me da no tiene palabras; es indescriptible.\nNo puedo expresar con palabras la paz que usted me ofrece, y me libera de toda ansiedad.\n\nDamos gracias por esta vida bendecida.\n\nJah, Jehov\u00e1, Yahv\u00e9, Emmanuel Dios con nosotros, Adonai, Elohim, Jesucristo, Cristo Jes\u00fas, nuestro Padre celestial, nuestro padre terrenal.\n\nAquel que nos cuida, nos protege y nos mima,\naquel que nos ofrece todas nuestras peticiones,\naquel que nos pastorea;\naquel que fue y es el padre que no he tenido,\naquel que siempre me habl\u00f3 al o\u00eddo y me aconsej\u00f3,\naquel que aun habi\u00e9ndome equivocado muchas veces estuvo ah\u00ed y me perdon\u00f3,\naquel que me ofrece cada d\u00eda nuevas oportunidades,\naquel que es mi Salvador, mi Dios, Cristo Jes\u00fas.\n\nUsted es nuestro Pastor y nosotros su reba\u00f1o.\nSi hoy nos equivocamos, corr\u00edjanos con su vara;\nsi caemos en el agujero o tropezamos con la piedra en el camino \u2014sea puesta por otros o por nosotros mismos\u2014\ns\u00e1quenos con su cayado, porque usted es nuestro Pastor.\n\nLe pido que derrame su bendici\u00f3n sobre m\u00ed y sobre toda mi familia.\nBend\u00edganos con su misericordia, gu\u00edenos con su luz y ens\u00e9\u00f1enos a caminar en sus caminos.\nQue todo lo que hagamos sea agradable delante de usted.\nPor su gracia, bend\u00edganos este d\u00eda.\n\nDamos gracias por perdonarnos y darnos oportunidades todos los d\u00edas.\n\nQue reine siempre en nuestro coraz\u00f3n, para que nuestras decisiones sean aceptables a usted\ny podamos andar por el camino que hoy nos tiene preparado.\n\nGobierne en nuestra mente para que nuestros pensamientos y palabras sean agradables a usted.\n\nDeseo que nuestros hechos, obras y acciones sean agradables a usted.\n\nSe\u00f1or,\nle pido que santifique y mantenga puro nuestro esp\u00edritu, libre de pecado, para que podamos serle agradables y alcanzar la vida eterna en la Nueva Jerusal\u00e9n.\n\nQue gobierne en nuestro interior, para que nuestras decisiones, pensamientos y sentimientos est\u00e9n conforme a su voluntad y podamos caminar por el camino que nos tiene preparado.\n\nCuide, bendiga y proteja nuestro cuerpo con salud, para que podamos disfrutar con gratitud de los dones y regalos de la vida que nos da cada d\u00eda.\n\nSe\u00f1or, mi mayor deseo usted lo conoce: que podamos ser santos para usted, libres de pecado, para que podamos ser inscritos en el libro de la vida y que nos d\u00e9 un lugar en el reino de los cielos, en la Nueva Jerusal\u00e9n, para que mi familia y yo podamos vivir eternamente juntos junto a usted en perfecto amor siempre.\n\nMientras tanto, se\u00f1or, le pido mi petici\u00f3n m\u00e1s deseada aqu\u00ed en la vida carnal: le pido que nos ofrezca salud para que mi mujer y yo podamos llegar a ser viejitos, ver hacerse un hombre a nuestro hijo, sano y fuerte, conocer a su mujer y poder ver nacer, crecer y jugar a nuestros nietos.\n\nEse es el regalo m\u00e1s preciado que nos puede ofrecer aqu\u00ed en la tierra carnal, poder contemplarlo con nuestro ser ser\u00eda maravilloso. Ojal\u00e1 sea su voluntad ofrecernos estas cosas, pero dejamos en sus manos nuestras vidas y, sobre todo, aceptamos que su voluntad sea hecha.\n\nSe\u00f1or, sabemos que vivimos en un mundo de libertad y regido por leyes naturales, pero le pedimos que nos mantenga alejados de las adversidades, peligros, injusticias y de la gente malvada del mundo. Confiamos en que nos mantenga protegidos y dejamos nuestras vidas en sus manos, pero sobre todo aceptamos que su voluntad sea hecha.\n\n\ud83d\ude4f Padre Nuestro  \n\ud83d\udd4a\ufe0f Gloria al Padre\n\nConf\u00edo en que mis oraciones y peticiones han sido escuchadas por usted, quien nos concede estos momentos de oraci\u00f3n. Am\u00e9n.";
+function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>el.classList.remove("show"),1300)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function buildInitialState(){const id=uid();return{currentId:id,items:[{id:id,title:"🌅 ✝️ Oración diaria completa",content:textoInicial,updatedAt:Date.now(),favorite:true}]}}
+function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function loadState(){const raw=localStorage.getItem(STORAGE_KEY);if(raw){try{state=JSON.parse(raw);if(!state||!Array.isArray(state.items)||!state.currentId)throw new Error("bad")}catch(e){state=buildInitialState();saveState()}}else{state=buildInitialState();saveState()}}
+function currentPrayer(){return state.items.find(x=>x.id===state.currentId)||state.items[0]||null}
+function escapeHtml(str){return str.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function renderList(){const q=document.getElementById("search").value.trim().toLowerCase(),list=document.getElementById("list");list.innerHTML="";const items=[...state.items].sort((a,b)=>(b.favorite===true)-(a.favorite===true)||b.updatedAt-a.updatedAt).filter(item=>item.title.toLowerCase().includes(q)||item.content.toLowerCase().includes(q));if(!items.length){list.innerHTML='<div class="empty">No hay resultados.</div>';return}items.forEach(item=>{const div=document.createElement("div");div.className="item"+(item.id===state.currentId?" active":"");const preview=item.content.trim().replace(/\n+/g," ").slice(0,70)||"Sin contenido";div.innerHTML='<div class="item-title-row"><div class="item-title">'+escapeHtml(item.title||"Sin título")+'</div><div class="fav">'+(item.favorite?'⭐':'')+'</div></div><div class="item-sub">'+escapeHtml(preview)+'</div>';div.onclick=()=>selectPrayer(item.id);list.appendChild(div)})}
+function renderReader(){const item=currentPrayer();if(!item)return;document.getElementById("readerTitle").textContent=item.favorite?'⭐ '+item.title:item.title;document.getElementById("readerText").textContent=item.content;document.getElementById("readerText").style.fontSize=readerSize+"px"}
+function selectPrayer(id){state.currentId=id;saveState();renderList();renderReader();openReader()}
+function openReader(){document.getElementById("readerView").classList.remove("hidden");document.getElementById("editorView").classList.add("hidden");document.getElementById("backupView").classList.add("hidden");document.body.classList.remove("fullscreen-reading","hide-reading-ui");if(window.innerWidth<=860)document.body.classList.add("reading-mobile");else document.body.classList.remove("reading-mobile")}
+function enterFullscreenReading(){document.getElementById("readerView").classList.remove("hidden");document.getElementById("editorView").classList.add("hidden");document.getElementById("backupView").classList.add("hidden");document.body.classList.add("fullscreen-reading");document.body.classList.remove("reading-mobile","hide-reading-ui");window.scrollTo({top:0,behavior:"smooth"});toast("Pantalla completa")}
+function exitFullscreenReading(){document.body.classList.remove("fullscreen-reading","hide-reading-ui");openReader()}
+function toggleReadingUI(){if(!document.body.classList.contains("fullscreen-reading"))return;document.body.classList.toggle("hide-reading-ui")}
+function openEditor(){const item=currentPrayer();if(!item)return;document.getElementById("editTitle").value=item.title;document.getElementById("editText").value=item.content;document.getElementById("editorView").classList.remove("hidden");document.getElementById("readerView").classList.add("hidden");document.getElementById("backupView").classList.add("hidden");document.body.classList.remove("reading-mobile","fullscreen-reading","hide-reading-ui")}
+function saveAndBack(){const item=currentPrayer();if(!item)return;item.title=document.getElementById("editTitle").value.trim()||"Sin título";item.content=document.getElementById("editText").value;item.updatedAt=Date.now();saveState();renderList();renderReader();openReader();toast("Guardado")}
+function cancelEdit(){openReader()}
+function newPrayer(){const id=uid();state.items.unshift({id:id,title:"Nueva oración",content:"",updatedAt:Date.now(),favorite:false});state.currentId=id;saveState();renderList();renderReader();openEditor()}
+function deletePrayer(){const item=currentPrayer();if(!item)return;if(state.items.length===1)return alert("Debe quedar al menos una oración.");if(!confirm('¿Borrar "'+item.title+'"?'))return;state.items=state.items.filter(x=>x.id!==item.id);state.currentId=state.items[0].id;saveState();renderList();renderReader();openReader();toast("Borrada")}
+function copyPrayer(){const item=currentPrayer();if(!item)return;navigator.clipboard.writeText(item.content).then(()=>toast("Oración copiada")).catch(()=>alert("No se pudo copiar."))}
+function toggleFavorite(){const item=currentPrayer();if(!item)return;item.favorite=!item.favorite;item.updatedAt=Date.now();saveState();renderList();renderReader();toast(item.favorite?"Marcada como favorita":"Quitada de favoritas")}
+function toggleTheme(){document.body.classList.toggle("dark");localStorage.setItem(THEME_KEY,document.body.classList.contains("dark")?"dark":"light")}
+function applyTheme(){if(localStorage.getItem(THEME_KEY)==="dark")document.body.classList.add("dark")}
+function changeReaderSize(delta){readerSize+=delta;if(readerSize<20)readerSize=20;if(readerSize>34)readerSize=34;localStorage.setItem(SIZE_KEY,String(readerSize));renderReader()}
+function openList(){document.body.classList.remove("reading-mobile","fullscreen-reading","hide-reading-ui");document.getElementById("search").focus()}
+function openBackup(){document.getElementById("backupView").classList.remove("hidden");document.getElementById("readerView").classList.add("hidden");document.getElementById("editorView").classList.add("hidden");document.body.classList.remove("reading-mobile","fullscreen-reading","hide-reading-ui")}
+function closeBackup(){openReader()}
+function downloadTextFile(filename,text){try{const blob=new Blob([text],{type:"application/json;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1200)}catch(e){}}
+async function shareBackup(text){if(navigator.share){try{await navigator.share({title:"Backup Oraciones",text:text})}catch(e){}}}
+async function exportBackup(){const payload={exportedAt:new Date().toISOString(),items:state.items,currentId:state.currentId};const text=JSON.stringify(payload,null,2);document.getElementById("backupText").value=text;const now=new Date();const stamp=now.getFullYear().toString()+String(now.getMonth()+1).padStart(2,"0")+String(now.getDate()).padStart(2,"0")+"_"+String(now.getHours()).padStart(2,"0")+String(now.getMinutes()).padStart(2,"0");downloadTextFile("backup_oraciones_"+stamp+".json",text);try{await navigator.clipboard.writeText(text)}catch(e){}shareBackup(text);toast("Backup listo: descargar + copiar + compartir")}
+function importBackup(){const text=document.getElementById("backupText").value.trim();if(!text)return alert("Pega primero una copia de seguridad.");try{const parsed=JSON.parse(text);if(!parsed.items||!Array.isArray(parsed.items)||!parsed.items.length)throw new Error("bad");state={items:parsed.items.map(x=>({id:x.id||uid(),title:x.title||"Sin título",content:x.content||"",updatedAt:x.updatedAt||Date.now(),favorite:!!x.favorite})),currentId:parsed.currentId||parsed.items[0].id};saveState();renderList();renderReader();openReader();toast("Backup importado")}catch(e){alert("La copia no es válida.")}}
+function setPin(){const pin=prompt("Escribe un PIN numérico de 4 a 8 cifras:");if(!pin)return;if(!/^\d{4,8}$/.test(pin))return alert("Debe tener entre 4 y 8 números.");localStorage.setItem(PIN_KEY,pin);toast("PIN guardado")}
+function removePin(){if(!localStorage.getItem(PIN_KEY))return alert("No hay PIN activo.");if(!confirm("¿Quitar el PIN de la app?"))return;localStorage.removeItem(PIN_KEY);toast("PIN eliminado")}
+function maybeLock(){const pin=localStorage.getItem(PIN_KEY);if(!pin)return;document.getElementById("lockScreen").classList.remove("hidden");setTimeout(()=>document.getElementById("lockPinInput").focus(),50)}
+function unlockApp(){const pin=localStorage.getItem(PIN_KEY),value=document.getElementById("lockPinInput").value;if(!pin){document.getElementById("lockScreen").classList.add("hidden");return}if(value===pin){document.getElementById("lockScreen").classList.add("hidden");document.getElementById("lockError").textContent="";document.getElementById("lockPinInput").value="";toast("Desbloqueada")}else document.getElementById("lockError").textContent="PIN incorrecto"}
+function skipLockIfNone(){if(!localStorage.getItem(PIN_KEY))document.getElementById("lockScreen").classList.add("hidden")}
+function resetApp(){if(!confirm("Esto reiniciará la app y dejará solo la oración inicial. ¿Continuar?"))return;localStorage.removeItem(STORAGE_KEY);localStorage.removeItem(SIZE_KEY);state=buildInitialState();saveState();renderList();renderReader();openReader();toast("App reiniciada")}
+function dismissInstall(){localStorage.setItem(INSTALL_DISMISSED_KEY,"1");document.getElementById("installBanner").classList.add("hidden")}
+function maybeShowInstall(){if(localStorage.getItem(INSTALL_DISMISSED_KEY)==="1")return;if(deferredPrompt)document.getElementById("installBanner").classList.remove("hidden")}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;maybeShowInstall()})
+document.addEventListener("DOMContentLoaded",()=>{document.getElementById("installBtn").addEventListener("click",async()=>{if(!deferredPrompt){toast("Abre el menú del navegador y prueba instalar o añadir a inicio");return}deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;document.getElementById("installBanner").classList.add("hidden")})})
+window.addEventListener("appinstalled",()=>{document.getElementById("installBanner").classList.add("hidden");toast("App instalada")})
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js?v="+APP_VERSION)})}
+applyTheme();loadState();renderList();renderReader();openReader();maybeLock();maybeShowInstall();
 </script>
 </body>
 </html>
