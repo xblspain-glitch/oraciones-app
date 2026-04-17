@@ -4,9 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Oraciones</title>
+<link rel="manifest" href="manifest.json?v=instalable_pro_v1_cc8652b249">
 <meta name="theme-color" content="#111111">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Oraciones">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=instalable_pro_v1_cc8652b249">
+<link rel="apple-touch-icon" href="icon-192.png?v=instalable_pro_v1_cc8652b249">
 <style>
 :root {
   --bg:#f8f6f1; --card:#ffffff; --text:#181818; --muted:#6b665d; --line:#e5dece;
@@ -104,6 +108,14 @@ body.dark .topbar { background:rgba(17,17,17,.96); }
 .row { display:flex; gap:8px; flex-wrap:wrap; }
 .small-note { color:var(--muted); font-size:13px; padding:0 18px 18px; }
 
+.install-banner {
+  position:fixed; left:10px; right:10px; bottom:10px; z-index:100;
+  background:var(--card); border:1px solid var(--line); border-radius:18px;
+  padding:12px; box-shadow:0 8px 24px rgba(0,0,0,.18);
+}
+.install-title { font-weight:bold; margin-bottom:6px; }
+.install-sub { color:var(--muted); font-size:13px; margin-bottom:10px; }
+
 @media (max-width:860px) {
   .main { grid-template-columns:1fr; }
   .sidebar { display:block; border-right:none; border-bottom:1px solid var(--line); max-height:34dvh; }
@@ -130,6 +142,15 @@ body.dark .topbar { background:rgba(17,17,17,.96); }
       <button class="btn soft" onclick="skipLockIfNone()">Cancelar</button>
     </div>
     <div id="lockError" class="small-note"></div>
+  </div>
+</div>
+
+<div id="installBanner" class="install-banner hidden">
+  <div class="install-title">Instalar app</div>
+  <div class="install-sub">Puedes instalarla para abrirla como app real desde tu móvil.</div>
+  <div class="row">
+    <button class="btn primary" id="installBtn">Instalar</button>
+    <button class="btn soft" onclick="dismissInstall()">Ahora no</button>
   </div>
 </div>
 
@@ -193,11 +214,14 @@ body.dark .topbar { background:rgba(17,17,17,.96); }
 <div id="toast" class="toast">Guardado</div>
 
 <script>
-const STORAGE_KEY = "oraciones_todo_v1";
-const THEME_KEY = "oraciones_todo_theme_v1";
-const SIZE_KEY = "oraciones_todo_reader_size_v1";
-const PIN_KEY = "oraciones_todo_pin_v1";
+const APP_VERSION = "instalable_pro_v1_cc8652b249";
+const STORAGE_KEY = "oraciones_instalable_pro_v1";
+const THEME_KEY = "oraciones_instalable_pro_theme_v1";
+const SIZE_KEY = "oraciones_instalable_pro_reader_size_v1";
+const PIN_KEY = "oraciones_instalable_pro_pin_v1";
+const INSTALL_DISMISSED_KEY = "oraciones_instalable_pro_install_dismissed_v1";
 
+let deferredPrompt = null;
 let readerSize = parseInt(localStorage.getItem(SIZE_KEY) || "24", 10);
 let state = { currentId: null, items: [] };
 const textoInicial = "\ud83c\udf05 \u271d\ufe0f Oraci\u00f3n diaria completa\n\nSe\u00f1or Dios Todopoderoso,\ndamos gracias por este nuevo d\u00eda que me concede.\n\nDamos gracias por la vida que me ha dado,\npor el regalo de la vida, desde la creaci\u00f3n y el nacimiento,\nhasta el regalo de la vida eterna.\n\nPor ser el centro de mi vida,\npor llevar las riendas de mi vida\ny darle sentido.\n\nDamos gracias por hacerme sentir grande y querido por usted, en este mundo que me hace sentir peque\u00f1o e insignificante,\naunque eso no me importa,\nporque todo lo que deseo es agradarle a usted.\n\nToda mi vida gira en torno a usted con su perfecto amor.\nSin usted, la vida no tendr\u00eda sentido.\n\nDamos gracias por la familia tan maravillosa que me ha dado:\npor el hijo tan maravilloso, honrado y humilde que me ha ofrecido.\n\nMe encanta que su coraz\u00f3n se sienta atra\u00eddo por usted y se interese en conocerle, a su manera y a su debido tiempo, porque cada uno tiene su propio camino hacia usted seg\u00fan su voluntad.\n\nYa me gustar\u00eda haber sido la mitad de lo que es \u00e9l cuando yo ten\u00eda su edad.\n\nDamos gracias por la mujer que me ha ofrecido, tan maravillosa y querida, y por la paciencia que tiene conmigo.\nTantos a\u00f1os juntos y contin\u00faa a mi lado; es una bendici\u00f3n.\nDamos gracias por ponerla en mi vida, porque tiene un gran coraz\u00f3n.\n\nDamos gracias por ser la luz, mi gu\u00eda, mi instructor, mi maestro, mi amor; quien me acompa\u00f1a all\u00e1 donde voy.\n\nLe pido que derrame su amor sobre m\u00ed, para que yo pueda transmitirlo a mi familia.\n\nDamos gracias por darme todo esto, para tratar de ser ejemplo para mi familia e intentar acercarles a usted, aunque s\u00e9 que cada uno tiene su propio camino hacia usted seg\u00fan su voluntad.\n\nBendiga y proteja a mi madre, hermana, cu\u00f1ados, suegros y sobrinos, manteni\u00e9ndolos bendecidos en este nuevo d\u00eda.\n\nDamos gracias por el trabajo que nos ha ofrecido,\npor el cual tenemos cubiertas nuestras necesidades:\nno nos falta un techo ni comida,\ny podemos cubrir lo necesario e incluso nos ofrece algunos caprichos.\n\nSolo le pido que podamos conservarlo y mantenerlo,\nnos encantar\u00eda poder jubilarnos en \u00e9l;\naunque, sobre todo, aceptamos su voluntad.\n\nDamos gracias porque me ofrece justo lo que mi alma necesita y lo que le pido;\nsiento que, con lo que me concede, me gu\u00eda a vivir conforme a su voluntad,\ny por ello le estoy agradecido.\n\nLa paz que usted me da no tiene palabras; es indescriptible.\nNo puedo expresar con palabras la paz que usted me ofrece, y me libera de toda ansiedad.\n\nDamos gracias por esta vida bendecida.\n\nJah, Jehov\u00e1, Yahv\u00e9, Emmanuel Dios con nosotros, Adonai, Elohim, Jesucristo, Cristo Jes\u00fas, nuestro Padre celestial, nuestro padre terrenal.\n\nAquel que nos cuida, nos protege y nos mima,\naquel que nos ofrece todas nuestras peticiones,\naquel que nos pastorea;\naquel que fue y es el padre que no he tenido,\naquel que siempre me habl\u00f3 al o\u00eddo y me aconsej\u00f3,\naquel que aun habi\u00e9ndome equivocado muchas veces estuvo ah\u00ed y me perdon\u00f3,\naquel que me ofrece cada d\u00eda nuevas oportunidades,\naquel que es mi Salvador, mi Dios, Cristo Jes\u00fas.\n\nUsted es nuestro Pastor y nosotros su reba\u00f1o.\nSi hoy nos equivocamos, corr\u00edjanos con su vara;\nsi caemos en el agujero o tropezamos con la piedra en el camino \u2014sea puesta por otros o por nosotros mismos\u2014\ns\u00e1quenos con su cayado, porque usted es nuestro Pastor.\n\nLe pido que derrame su bendici\u00f3n sobre m\u00ed y sobre toda mi familia.\nBend\u00edganos con su misericordia, gu\u00edenos con su luz y ens\u00e9\u00f1enos a caminar en sus caminos.\nQue todo lo que hagamos sea agradable delante de usted.\nPor su gracia, bend\u00edganos este d\u00eda.\n\nDamos gracias por perdonarnos y darnos oportunidades todos los d\u00edas.\n\nQue reine siempre en nuestro coraz\u00f3n, para que nuestras decisiones sean aceptables a usted\ny podamos andar por el camino que hoy nos tiene preparado.\n\nGobierne en nuestra mente para que nuestros pensamientos y palabras sean agradables a usted.\n\nDeseo que nuestros hechos, obras y acciones sean agradables a usted.\n\nSe\u00f1or,\nle pido que santifique y mantenga puro nuestro esp\u00edritu, libre de pecado, para que podamos serle agradables y alcanzar la vida eterna en la Nueva Jerusal\u00e9n.\n\nQue gobierne en nuestro interior, para que nuestras decisiones, pensamientos y sentimientos est\u00e9n conforme a su voluntad y podamos caminar por el camino que nos tiene preparado.\n\nCuide, bendiga y proteja nuestro cuerpo con salud, para que podamos disfrutar con gratitud de los dones y regalos de la vida que nos da cada d\u00eda.\n\nSe\u00f1or, mi mayor deseo usted lo conoce: que podamos ser santos para usted, libres de pecado, para que podamos ser inscritos en el libro de la vida y que nos d\u00e9 un lugar en el reino de los cielos, en la Nueva Jerusal\u00e9n, para que mi familia y yo podamos vivir eternamente juntos junto a usted en perfecto amor siempre.\n\nMientras tanto, se\u00f1or, le pido mi petici\u00f3n m\u00e1s deseada aqu\u00ed en la vida carnal: le pido que nos ofrezca salud para que mi mujer y yo podamos llegar a ser viejitos, ver hacerse un hombre a nuestro hijo, sano y fuerte, conocer a su mujer y poder ver nacer, crecer y jugar a nuestros nietos.\n\nEse es el regalo m\u00e1s preciado que nos puede ofrecer aqu\u00ed en la tierra carnal, poder contemplarlo con nuestro ser ser\u00eda maravilloso. Ojal\u00e1 sea su voluntad ofrecernos estas cosas, pero dejamos en sus manos nuestras vidas y, sobre todo, aceptamos que su voluntad sea hecha.\n\nSe\u00f1or, sabemos que vivimos en un mundo de libertad y regido por leyes naturales, pero le pedimos que nos mantenga alejados de las adversidades, peligros, injusticias y de la gente malvada del mundo. Confiamos en que nos mantenga protegidos y dejamos nuestras vidas en sus manos, pero sobre todo aceptamos que su voluntad sea hecha.\n\n\ud83d\ude4f Padre Nuestro  \n\ud83d\udd4a\ufe0f Gloria al Padre\n\nConf\u00edo en que mis oraciones y peticiones han sido escuchadas por usted, quien nos concede estos momentos de oraci\u00f3n. Am\u00e9n.";
@@ -233,9 +257,7 @@ function loadState() {
     saveState();
   }
 }
-function currentPrayer() {
-  return state.items.find(x => x.id === state.currentId) || state.items[0] || null;
-}
+function currentPrayer() { return state.items.find(x => x.id === state.currentId) || state.items[0] || null; }
 function escapeHtml(str) {
   return str.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 }
@@ -282,12 +304,8 @@ function openReader() {
   document.getElementById("backupView").classList.add("hidden");
   document.body.classList.remove("fullscreen-reading");
   document.body.classList.remove("hide-reading-ui");
-  if (window.innerWidth <= 860) {
-    document.body.classList.add("reading-mobile");
-  } else {
-    document.body.classList.remove("reading-mobile");
-  }
-  toast("Modo lectura");
+  if (window.innerWidth <= 860) document.body.classList.add("reading-mobile");
+  else document.body.classList.remove("reading-mobile");
 }
 function enterFullscreenReading() {
   document.getElementById("readerView").classList.remove("hidden");
@@ -395,15 +413,9 @@ function openBackup() {
   document.body.classList.remove("reading-mobile", "fullscreen-reading", "hide-reading-ui");
   toast("Panel backup");
 }
-function closeBackup() {
-  openReader();
-}
+function closeBackup() { openReader(); }
 function exportBackup() {
-  const payload = {
-    exportedAt: new Date().toISOString(),
-    items: state.items,
-    currentId: state.currentId
-  };
+  const payload = { exportedAt: new Date().toISOString(), items: state.items, currentId: state.currentId };
   const text = JSON.stringify(payload, null, 2);
   document.getElementById("backupText").value = text;
   navigator.clipboard.writeText(text).then(() => toast("Backup copiado")).catch(() => toast("Backup generado"));
@@ -436,7 +448,7 @@ function importBackup() {
 function setPin() {
   const pin = prompt("Escribe un PIN numérico de 4 a 8 cifras:");
   if (!pin) return;
-  if (!/^\d(4, 8)$/.test(pin)) return alert("Debe tener entre 4 y 8 números.");
+  if (!/^\d{4,8}$/.test(pin)) return alert("Debe tener entre 4 y 8 números.");
   localStorage.setItem(PIN_KEY, pin);
   toast("PIN guardado");
 }
@@ -469,9 +481,7 @@ function unlockApp() {
   }
 }
 function skipLockIfNone() {
-  if (!localStorage.getItem(PIN_KEY)) {
-    document.getElementById("lockScreen").classList.add("hidden");
-  }
+  if (!localStorage.getItem(PIN_KEY)) document.getElementById("lockScreen").classList.add("hidden");
 }
 function resetApp() {
   if (!confirm("Esto reiniciará la app y dejará solo la oración inicial. ¿Continuar?")) return;
@@ -485,12 +495,47 @@ function resetApp() {
   toast("App reiniciada");
 }
 
+function dismissInstall() {
+  localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
+  document.getElementById("installBanner").classList.add("hidden");
+}
+function maybeShowInstall() {
+  if (localStorage.getItem(INSTALL_DISMISSED_KEY) === "1") return;
+  if (deferredPrompt) document.getElementById("installBanner").classList.remove("hidden");
+}
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  maybeShowInstall();
+});
+document.getElementById("installBtn").addEventListener("click", async () => {
+  if (!deferredPrompt) {
+    toast("Abre el menú del navegador y prueba instalar o añadir a inicio");
+    return;
+  }
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById("installBanner").classList.add("hidden");
+});
+window.addEventListener("appinstalled", () => {
+  document.getElementById("installBanner").classList.add("hidden");
+  toast("App instalada");
+});
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js?v=" + APP_VERSION);
+  });
+}
+
 applyTheme();
 loadState();
 renderList();
 renderReader();
 openReader();
 maybeLock();
+maybeShowInstall();
 </script>
 </body>
 </html>
