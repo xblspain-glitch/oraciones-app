@@ -5,31 +5,89 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Oraciones y Notas</title>
 <meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Oraciones">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
-:root{--bg:#f8f6f1;--card:#fff;--text:#181818;--muted:#6b665d;--line:#e5dece;--primary:#8a5a2b;--soft:#efe7da;--danger:#b84a3c;--accent:#c59763}
-body.dark{--bg:#111;--card:#1a1a1a;--text:#f2eee7;--muted:#b5ab9c;--line:#2f2a24;--primary:#c89763;--soft:#24211d;--danger:#d56d61;--accent:#ffd27d}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%}body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}button,input,textarea{font-family:inherit}
-.topbar{position:sticky;top:0;z-index:40;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;background:rgba(248,246,241,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}body.dark .topbar{background:rgba(17,17,17,.96)}
-.topbar-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.btn{border:none;border-radius:14px;padding:10px 12px;font-size:14px;cursor:pointer}.btn.primary{background:var(--primary);color:#fff}.btn.soft{background:var(--soft);color:var(--text)}.btn.danger{background:var(--danger);color:#fff}
-.segment{display:flex;gap:6px;background:var(--soft);padding:4px;border-radius:14px}.segment button{border:none;background:transparent;padding:8px 12px;border-radius:10px;cursor:pointer}.segment button.active{background:var(--card);font-weight:bold}
+:root{
+  --bg:#f8f6f1; --card:#ffffff; --text:#181818; --muted:#6b665d; --line:#e5dece;
+  --primary:#8a5a2b; --soft:#efe7da; --danger:#b84a3c; --accent:#c59763;
+}
+body.dark{
+  --bg:#111111; --card:#1a1a1a; --text:#f2eee7; --muted:#b5ab9c; --line:#2f2a24;
+  --primary:#c89763; --soft:#24211d; --danger:#d56d61; --accent:#ffd27d;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,textarea{font-family:inherit}
+.topbar{position:sticky;top:0;z-index:40;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;background:rgba(248,246,241,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+body.dark .topbar{background:rgba(17,17,17,.96)}
+.topbar-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:none;border-radius:14px;padding:10px 12px;font-size:14px;cursor:pointer}
+.btn.primary{background:var(--primary);color:#fff}
+.btn.soft{background:var(--soft);color:var(--text)}
+.btn.danger{background:var(--danger);color:#fff}
+.segment{display:flex;gap:6px;background:var(--soft);padding:4px;border-radius:14px}
+.segment button{border:none;background:transparent;padding:8px 12px;border-radius:10px;cursor:pointer}
+.segment button.active{background:var(--card);font-weight:bold}
 .search{flex:1;min-width:180px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:14px;padding:10px 12px;font-size:15px}
-.main{display:grid;grid-template-columns:300px 1fr;min-height:calc(100dvh - 68px)}.sidebar{border-right:1px solid var(--line);overflow:auto;background:var(--bg);padding:10px}.list{display:flex;flex-direction:column;gap:8px}
-.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;cursor:pointer}.item.active{outline:2px solid var(--primary)}.item-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.item-title{font-weight:bold;margin-bottom:4px}.item-sub{color:var(--muted);font-size:13px}.fav{color:var(--accent);font-size:18px}
-.content{min-width:0;overflow:auto;padding:12px}.panel{background:var(--card);border:1px solid var(--line);border-radius:20px;min-height:calc(100dvh - 92px);display:flex;flex-direction:column;overflow:hidden}
+.main{display:grid;grid-template-columns:300px 1fr;min-height:calc(100dvh - 68px)}
+.sidebar{border-right:1px solid var(--line);overflow:auto;background:var(--bg);padding:10px}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;cursor:pointer}
+.item.active{outline:2px solid var(--primary)}
+.item-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.item-title{font-weight:bold;margin-bottom:4px}
+.item-sub{color:var(--muted);font-size:13px}
+.fav{color:var(--accent);font-size:18px}
+.content{min-width:0;overflow:auto;padding:12px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:20px;min-height:calc(100dvh - 92px);display:flex;flex-direction:column;overflow:hidden}
 .panel-head{position:sticky;top:0;z-index:3;display:flex;gap:8px;flex-wrap:wrap;padding:10px;border-bottom:1px solid var(--line);background:var(--card)}
-.reader-title{font-size:24px;font-weight:bold;padding:16px 18px 0}.reader-text{white-space:pre-wrap;padding:18px 18px 40px;font-size:24px;line-height:2.05}
+.reader-title{font-size:24px;font-weight:bold;padding:16px 18px 0}
+.reader-text{white-space:pre-wrap;padding:18px 18px 40px;font-size:24px;line-height:2.05}
 .title-input{width:100%;border:none;border-bottom:1px solid var(--line);outline:none;background:var(--card);color:var(--text);font-size:22px;font-weight:bold;padding:14px 16px}
 .text-input,.backup-text{flex:1;width:100%;border:none;outline:none;resize:none;background:var(--card);color:var(--text);font-size:18px;line-height:1.7;padding:18px;min-height:50dvh}
-.hidden{display:none!important}.empty{color:var(--muted);padding:18px}.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:95}.toast.show{opacity:1}
-.trash-list{padding:12px;display:flex;flex-direction:column;gap:8px}.trash-item{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px}.trash-title{font-weight:bold;margin-bottom:8px}
-.row{display:flex;gap:8px;flex-wrap:wrap}.small-note{color:var(--muted);font-size:13px;padding:0 18px 18px}.status{color:var(--muted);font-size:13px;padding:10px 12px;margin-left:auto}
-@media (max-width:860px){.main{grid-template-columns:1fr}.sidebar{display:block;border-right:none;border-bottom:1px solid var(--line);max-height:34dvh}.content{padding:0}.panel{border:none;border-radius:0;min-height:calc(100dvh - 62px)}.panel-head{padding:8px;border-radius:0}.reader-title{font-size:22px;padding:14px 16px 0}.reader-text{font-size:23px;line-height:2;padding:16px 16px 34px}.text-input,.backup-text{font-size:18px;line-height:1.7;min-height:56dvh}.search{order:2;width:100%;flex-basis:100%}.status{width:100%;margin-left:0;padding-top:0}}
+.hidden{display:none!important}
+.empty{color:var(--muted);padding:18px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:95}
+.toast.show{opacity:1}
+.trash-list{padding:12px;display:flex;flex-direction:column;gap:8px}
+.trash-item{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px}
+.trash-title{font-weight:bold;margin-bottom:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.small-note{color:var(--muted);font-size:13px;padding:0 18px 18px}
+.status{color:var(--muted);font-size:13px;padding:10px 12px;margin-left:auto}
+.install-box{position:fixed;left:10px;right:10px;bottom:10px;z-index:100;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.install-title{font-weight:bold;margin-bottom:6px}
+.install-sub{color:var(--muted);font-size:13px;margin-bottom:10px}
+@media (max-width:860px){
+  .main{grid-template-columns:1fr}
+  .sidebar{display:block;border-right:none;border-bottom:1px solid var(--line);max-height:34dvh}
+  .content{padding:0}
+  .panel{border:none;border-radius:0;min-height:calc(100dvh - 62px)}
+  .panel-head{padding:8px;border-radius:0}
+  .reader-title{font-size:22px;padding:14px 16px 0}
+  .reader-text{font-size:23px;line-height:2;padding:16px 16px 34px}
+  .text-input,.backup-text{font-size:18px;line-height:1.7;min-height:56dvh}
+  .search{order:2;width:100%;flex-basis:100%}
+  .status{width:100%;margin-left:0;padding-top:0}
+}
 </style>
 </head>
 <body>
+<div id="installBox" class="install-box hidden">
+  <div class="install-title">Instalar app</div>
+  <div id="installText" class="install-sub">Si no aparece el instalador automático, usa el menú del navegador y elige “Añadir a pantalla de inicio”.</div>
+  <div class="row">
+    <button id="installBtn" class="btn primary" type="button">Instalar</button>
+    <button class="btn soft" type="button" onclick="hideInstallBox()">Cerrar</button>
+  </div>
+</div>
+
 <div class="topbar"><div class="topbar-row">
 <div class="segment">
 <button id="tabPrayers" class="active" type="button" onclick="switchSection('prayers')">✝️ Oraciones</button>
@@ -39,6 +97,7 @@ body.dark{--bg:#111;--card:#1a1a1a;--text:#f2eee7;--muted:#b5ab9c;--line:#2f2a24
 <button class="btn soft" type="button" onclick="openEditor()">✍️ Editar</button>
 <button class="btn soft" type="button" onclick="openBackup()">☁️ Backup</button>
 <button class="btn soft" type="button" onclick="openTrash()">🗑️ Papelera</button>
+<button class="btn soft" type="button" onclick="showInstallBox()">📲 Instalar</button>
 <button class="btn soft" type="button" onclick="resetApp()">♻️ Reset</button>
 <button class="btn soft" type="button" onclick="toggleTheme()">🌙</button>
 <button class="btn danger" type="button" onclick="moveToTrash()">🗑️ Eliminar</button>
@@ -93,17 +152,17 @@ body.dark{--bg:#111;--card:#1a1a1a;--text:#f2eee7;--muted:#b5ab9c;--line:#2f2a24
 <div id="toast" class="toast">Guardado</div>
 
 <script>
-const STORAGE_KEY = "oraciones_guardar_pro_v1";
-const AUTO_BACKUP_KEY = "oraciones_guardar_pro_auto_backup_v1";
-const THEME_KEY = "oraciones_guardar_pro_theme_v1";
-
+const STORAGE_KEY = "oraciones_install_fix_v1";
+const AUTO_BACKUP_KEY = "oraciones_install_fix_auto_backup_v1";
+const THEME_KEY = "oraciones_install_fix_theme_v1";
+let deferredPrompt = null;
 let section = "prayers";
 let state = {section:"prayers",currentPrayerId:null,currentNoteId:null,prayers:[],notes:[],trashPrayers:[],trashNotes:[]};
 let isDirty = false;
 let autosaveTimer = null;
 
-const seedPrayer = "🌅 ✝️ Oración diaria completa\n\nSeñor Dios Todopoderoso,\ndamos gracias por este nuevo día que me concede.\n\nDamos gracias por la vida que me ha dado,\npor el regalo de la vida, desde la creación y el nacimiento,\nhasta el regalo de la vida eterna.";
-const seedNote = "Aquí puedes guardar ideas, reflexiones, versículos sueltos o recordatorios.";
+const seedPrayer = "\ud83c\udf05 \u271d\ufe0f Oraci\u00f3n diaria completa\n\nSe\u00f1or Dios Todopoderoso,\ndamos gracias por este nuevo d\u00eda que me concede.\n\nDamos gracias por la vida que me ha dado,\npor el regalo de la vida, desde la creaci\u00f3n y el nacimiento,\nhasta el regalo de la vida eterna.\n\nPor ser el centro de mi vida,\npor llevar las riendas de mi vida\ny darle sentido.\n";
+const seedNote = "Aqu\u00ed puedes guardar ideas, reflexiones, vers\u00edculos sueltos o recordatorios.";
 
 function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>el.classList.remove("show"),1300)}
 function setSaveStatus(msg){const el=document.getElementById("saveStatus");if(el) el.textContent=msg}
@@ -144,7 +203,12 @@ function openBackup(){document.getElementById("backupView").classList.remove("hi
 function downloadTextFile(filename,text){try{const blob=new Blob([text],{type:"application/json;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1200)}catch(e){}}
 async function exportBackup(){const payload={exportedAt:new Date().toISOString(),...state};const text=JSON.stringify(payload,null,2);document.getElementById("backupText").value=text;downloadTextFile("backup_oraciones_notas.json",text);try{await navigator.clipboard.writeText(text)}catch(e){}toast("Backup listo")}
 function importBackup(){const text=document.getElementById("backupText").value.trim();if(!text) return alert("Pega primero una copia.");try{const parsed=JSON.parse(text);if(!Array.isArray(parsed.prayers)||!Array.isArray(parsed.notes)) throw new Error("bad");state={section:parsed.section||"prayers",currentPrayerId:parsed.currentPrayerId||(parsed.prayers[0]&&parsed.prayers[0].id),currentNoteId:parsed.currentNoteId||(parsed.notes[0]&&parsed.notes[0].id),prayers:parsed.prayers,notes:parsed.notes,trashPrayers:Array.isArray(parsed.trashPrayers)?parsed.trashPrayers:[],trashNotes:Array.isArray(parsed.trashNotes)?parsed.trashNotes:[]};saveState();section=state.section;syncTabs();renderList();renderReader();openReader();toast("Backup importado")}catch(e){alert("La copia no es válida.")}}
-document.addEventListener("DOMContentLoaded",()=>{document.getElementById("editTitle").addEventListener("input",scheduleAutosave);document.getElementById("editText").addEventListener("input",scheduleAutosave)})
+function showInstallBox(){document.getElementById("installBox").classList.remove("hidden");const txt=document.getElementById("installText");if(deferredPrompt) txt.textContent="Pulsa instalar aquí abajo. Si no funciona, usa el menú del navegador y elige “Añadir a pantalla de inicio”.";else txt.textContent="Si Chrome no muestra instalación automática, usa el menú del navegador y elige “Añadir a pantalla de inicio”.";}
+function hideInstallBox(){document.getElementById("installBox").classList.add("hidden")}
+window.addEventListener("beforeinstallprompt", e=>{e.preventDefault();deferredPrompt=e;})
+document.addEventListener("DOMContentLoaded",()=>{document.getElementById("editTitle").addEventListener("input",scheduleAutosave);document.getElementById("editText").addEventListener("input",scheduleAutosave);document.getElementById("installBtn").addEventListener("click", async ()=>{if(!deferredPrompt){toast("Usa el menú del navegador: Añadir a pantalla de inicio");return}deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null;hideInstallBox();})})
+window.addEventListener("appinstalled",()=>{hideInstallBox();toast("App instalada")})
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js")})}
 applyTheme();loadState();syncTabs();renderList();renderReader();openReader();
 </script>
 </body>
