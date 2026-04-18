@@ -4,21 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Oraciones y Notas</title>
-<link rel="manifest" href="manifest.json?v=final_10138e8140">
 <meta name="theme-color" content="#111111">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Oraciones">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=final_10138e8140">
-<link rel="apple-touch-icon" href="icon-192.png?v=final_10138e8140">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
-:root{--bg:#f8f6f1;--card:#fff;--text:#181818;--muted:#6b665d;--line:#e5dece;--primary:#8a5a2b;--soft:#efe7da;--danger:#b84a3c;--accent:#c59763}
-body.dark{--bg:#111;--card:#1a1a1a;--text:#f2eee7;--muted:#b5ab9c;--line:#2f2a24;--primary:#c89763;--soft:#24211d;--danger:#d56d61;--accent:#ffd27d}
+:root{
+  --bg:#f8f6f1; --card:#ffffff; --text:#181818; --muted:#6b665d; --line:#e5dece;
+  --primary:#8a5a2b; --soft:#efe7da; --danger:#b84a3c; --accent:#c59763;
+}
+body.dark{
+  --bg:#111111; --card:#1a1a1a; --text:#f2eee7; --muted:#b5ab9c; --line:#2f2a24;
+  --primary:#c89763; --soft:#24211d; --danger:#d56d61; --accent:#ffd27d;
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%}
 body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
 button,input,textarea{font-family:inherit}
-.topbar{position:sticky;top:0;z-index:40;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;background:rgba(248,246,241,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar{
+  position:sticky;top:0;z-index:40;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;
+  background:rgba(248,246,241,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)
+}
 body.dark .topbar{background:rgba(17,17,17,.96)}
 .topbar-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .btn{border:none;border-radius:14px;padding:10px 12px;font-size:14px;cursor:pointer}
@@ -45,7 +51,7 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 .reader-text{white-space:pre-wrap;padding:18px 18px 40px;font-size:24px;line-height:2.05}
 .title-input{width:100%;border:none;border-bottom:1px solid var(--line);outline:none;background:var(--card);color:var(--text);font-size:22px;font-weight:bold;padding:14px 16px}
 .text-input,.backup-text{flex:1;width:100%;border:none;outline:none;resize:none;background:var(--card);color:var(--text);font-size:18px;line-height:1.7;padding:18px;min-height:50dvh}
-.hidden{display:none!important}
+.hidden{display:none !important}
 .empty{color:var(--muted);padding:18px}
 .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111;color:#fff;padding:10px 14px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:95}
 .toast.show{opacity:1}
@@ -57,7 +63,7 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 .install-banner{position:fixed;left:10px;right:10px;bottom:10px;z-index:100;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
 .install-title{font-weight:bold;margin-bottom:6px}
 .install-sub{color:var(--muted);font-size:13px;margin-bottom:10px}
-.fullscreen-reading .topbar,.fullscreen-reading .sidebar{display:none!important}
+.fullscreen-reading .topbar,.fullscreen-reading .sidebar{display:none !important}
 .fullscreen-reading .main{grid-template-columns:1fr;min-height:100dvh}
 .fullscreen-reading .content{padding:0}
 .fullscreen-reading .panel{border:none;border-radius:0;min-height:100dvh}
@@ -84,25 +90,26 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
   <div class="install-title">Instalar app</div>
   <div class="install-sub">Puedes instalarla para abrirla como app real desde tu móvil.</div>
   <div class="row">
-    <button class="btn primary" id="installBtn">Instalar</button>
-    <button class="btn soft" onclick="dismissInstall()">Ahora no</button>
+    <button class="btn primary" id="installBtn" type="button">Instalar</button>
+    <button class="btn soft" type="button" onclick="dismissInstall()">Ahora no</button>
   </div>
 </div>
 
 <div class="topbar">
   <div class="topbar-row">
     <div class="segment">
-      <button id="tabPrayers" class="active" onclick="switchSection('prayers')">✝️ Oraciones</button>
-      <button id="tabNotes" onclick="switchSection('notes')">📝 Notas</button>
+      <button id="tabPrayers" class="active" type="button" onclick="switchSection('prayers')">✝️ Oraciones</button>
+      <button id="tabNotes" type="button" onclick="switchSection('notes')">📝 Notas</button>
     </div>
-    <button class="btn primary" onclick="newItem()">➕ Nueva</button>
-    <button class="btn soft" onclick="enterFullscreenReading()">📖 Leer</button>
-    <button class="btn soft" onclick="openEditor()">✍️ Editar</button>
-    <button class="btn soft" onclick="toggleFavorite()">⭐ Favorita</button>
-    <button class="btn soft" onclick="openBackup()">☁️ Backup</button>
-    <button class="btn soft" onclick="openTrash()">🗑️ Papelera</button>
-    <button class="btn soft" onclick="toggleTheme()">🌙</button>
-    <button class="btn danger" onclick="moveToTrash()">🗑️ Eliminar</button>
+    <button class="btn primary" type="button" onclick="newItem()">➕ Nueva</button>
+    <button class="btn soft" type="button" onclick="enterFullscreenReading()">📖 Leer</button>
+    <button class="btn soft" type="button" onclick="openEditor()">✍️ Editar</button>
+    <button class="btn soft" type="button" onclick="toggleFavorite()">⭐ Favorita</button>
+    <button class="btn soft" type="button" onclick="openBackup()">☁️ Backup</button>
+    <button class="btn soft" type="button" onclick="openTrash()">🗑️ Papelera</button>
+    <button class="btn soft" type="button" onclick="resetApp()">♻️ Reset</button>
+    <button class="btn soft" type="button" onclick="toggleTheme()">🌙</button>
+    <button class="btn danger" type="button" onclick="moveToTrash()">🗑️ Eliminar</button>
     <input id="search" class="search" placeholder="Buscar oración..." oninput="renderList()">
   </div>
 </div>
@@ -112,13 +119,13 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
   <section class="content">
     <div id="readerView" class="panel">
       <div class="panel-head">
-        <button class="btn soft" onclick="exitFullscreenReading(); event.stopPropagation();">← Volver</button>
-        <button class="btn soft" onclick="openList(); event.stopPropagation();">☰ Lista</button>
-        <button class="btn soft" onclick="openEditor(); event.stopPropagation();">✍️ Editar</button>
-        <button class="btn soft" onclick="changeReaderSize(-1); event.stopPropagation();">A-</button>
-        <button class="btn soft" onclick="changeReaderSize(1); event.stopPropagation();">A+</button>
-        <button class="btn soft" onclick="copyCurrent(); event.stopPropagation();">📋 Copiar</button>
-        <button class="btn soft" onclick="toggleFavorite(); event.stopPropagation();">⭐</button>
+        <button class="btn soft" type="button" onclick="exitFullscreenReading()">← Volver</button>
+        <button class="btn soft" type="button" onclick="openList()">☰ Lista</button>
+        <button class="btn soft" type="button" onclick="openEditor()">✍️ Editar</button>
+        <button class="btn soft" type="button" onclick="changeReaderSize(-1)">A-</button>
+        <button class="btn soft" type="button" onclick="changeReaderSize(1)">A+</button>
+        <button class="btn soft" type="button" onclick="copyCurrent()">📋 Copiar</button>
+        <button class="btn soft" type="button" onclick="toggleFavorite()">⭐</button>
       </div>
       <div id="readerTitle" class="reader-title"></div>
       <div id="readerText" class="reader-text" onclick="toggleReadingUI()"></div>
@@ -126,8 +133,8 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 
     <div id="editorView" class="panel hidden">
       <div class="panel-head">
-        <button class="btn primary" onclick="saveAndBack()">💾 Guardar y volver</button>
-        <button class="btn soft" onclick="openReader()">← Volver</button>
+        <button class="btn primary" type="button" onclick="saveAndBack()">💾 Guardar y volver</button>
+        <button class="btn soft" type="button" onclick="openReader()">← Volver</button>
       </div>
       <input id="editTitle" class="title-input" placeholder="Título">
       <textarea id="editText" class="text-input" placeholder="Escribe aquí..."></textarea>
@@ -135,10 +142,10 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 
     <div id="backupView" class="panel hidden">
       <div class="panel-head">
-        <button class="btn soft" onclick="openReader()">← Volver</button>
-        <button class="btn primary" onclick="exportBackup()">⬇ Exportar</button>
-        <button class="btn soft" onclick="importBackup()">⬆ Importar</button>
-        <button class="btn soft" onclick="restoreAutoBackup()">♻️ Recuperar automático</button>
+        <button class="btn soft" type="button" onclick="openReader()">← Volver</button>
+        <button class="btn primary" type="button" onclick="exportBackup()">⬇ Exportar</button>
+        <button class="btn soft" type="button" onclick="importBackup()">⬆ Importar</button>
+        <button class="btn soft" type="button" onclick="restoreAutoBackup()">♻️ Recuperar automático</button>
       </div>
       <textarea id="backupText" class="backup-text" placeholder="Aquí aparecerá tu copia de seguridad. También puedes pegar aquí una copia para importar."></textarea>
       <div class="small-note">El backup incluye oraciones, notas, las dos papeleras y además se guarda una copia automática local en cada cambio.</div>
@@ -146,8 +153,8 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 
     <div id="trashView" class="panel hidden">
       <div class="panel-head">
-        <button class="btn soft" onclick="openReader()">← Volver</button>
-        <button class="btn danger" onclick="emptyTrash()">Vaciar papelera</button>
+        <button class="btn soft" type="button" onclick="openReader()">← Volver</button>
+        <button class="btn danger" type="button" onclick="emptyTrash()">Vaciar papelera</button>
       </div>
       <div id="trashList" class="trash-list"></div>
     </div>
@@ -157,207 +164,285 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 <div id="toast" class="toast">Guardado</div>
 
 <script>
-const APP_VERSION="final_10138e8140";
-const STORAGE_KEY="oraciones_final_v1";
-const AUTO_BACKUP_KEY="oraciones_final_auto_backup_v1";
-const THEME_KEY="oraciones_final_theme_v1";
-const SIZE_KEY="oraciones_final_reader_size_v1";
-const INSTALL_DISMISSED_KEY="oraciones_final_install_dismissed_v1";
+const STORAGE_KEY = "oraciones_fix_total_v1";
+const AUTO_BACKUP_KEY = "oraciones_fix_total_auto_backup_v1";
+const THEME_KEY = "oraciones_fix_total_theme_v1";
+const SIZE_KEY = "oraciones_fix_total_reader_size_v1";
+const INSTALL_DISMISSED_KEY = "oraciones_fix_total_install_dismissed_v1";
 
-let deferredPrompt=null;
-let readerSize=parseInt(localStorage.getItem(SIZE_KEY)||"24",10);
-let section="prayers";
-let state={section:"prayers",currentPrayerId:null,currentNoteId:null,prayers:[],notes:[],trashPrayers:[],trashNotes:[]};
-const seedPrayer="\ud83c\udf05 \u271d\ufe0f Oraci\u00f3n diaria completa\n\nSe\u00f1or Dios Todopoderoso,\ndamos gracias por este nuevo d\u00eda que me concede.\n\nDamos gracias por la vida que me ha dado,\npor el regalo de la vida, desde la creaci\u00f3n y el nacimiento,\nhasta el regalo de la vida eterna.\n\nPor ser el centro de mi vida,\npor llevar las riendas de mi vida\ny darle sentido.\n";
+let deferredPrompt = null;
+let readerSize = parseInt(localStorage.getItem(SIZE_KEY) || "24", 10);
+let section = "prayers";
+let state = {
+  section: "prayers",
+  currentPrayerId: null,
+  currentNoteId: null,
+  prayers: [],
+  notes: [],
+  trashPrayers: [],
+  trashNotes: []
+};
 
-function toast(msg){
-  const el=document.getElementById("toast");
-  el.textContent=msg;
+const seedPrayer = "\ud83c\udf05 \u271d\ufe0f Oraci\u00f3n diaria completa\n\nSe\u00f1or Dios Todopoderoso,\ndamos gracias por este nuevo d\u00eda que me concede.\n\nDamos gracias por la vida que me ha dado,\npor el regalo de la vida, desde la creaci\u00f3n y el nacimiento,\nhasta el regalo de la vida eterna.\n\nPor ser el centro de mi vida,\npor llevar las riendas de mi vida\ny darle sentido.\n";
+const seedNote = "Aqu\u00ed puedes guardar ideas, reflexiones, vers\u00edculos sueltos o recordatorios.";
+
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
   el.classList.add("show");
   clearTimeout(window.__toastTimer);
-  window.__toastTimer=setTimeout(()=>el.classList.remove("show"),1300);
+  window.__toastTimer = setTimeout(() => el.classList.remove("show"), 1300);
 }
-function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
-function buildInitialState(){
-  const prayerId=uid(), noteId=uid();
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function buildInitialState() {
+  const prayerId = uid();
+  const noteId = uid();
   return {
-    section:"prayers",
-    currentPrayerId:prayerId,
-    currentNoteId:noteId,
-    prayers:[{id:prayerId,title:"🌅 ✝️ Oración diaria completa",content:seedPrayer,updatedAt:Date.now(),favorite:true}],
-    notes:[{id:noteId,title:"📝 Mi primera nota",content:"Aquí puedes guardar ideas, reflexiones, versículos sueltos o recordatorios.",updatedAt:Date.now(),favorite:false}],
-    trashPrayers:[],
-    trashNotes:[]
+    section: "prayers",
+    currentPrayerId: prayerId,
+    currentNoteId: noteId,
+    prayers: [{ id: prayerId, title: "🌅 ✝️ Oración diaria completa", content: seedPrayer, updatedAt: Date.now(), favorite: true }],
+    notes: [{ id: noteId, title: "📝 Mi primera nota", content: seedNote, updatedAt: Date.now(), favorite: false }],
+    trashPrayers: [],
+    trashNotes: []
   };
 }
-function saveState(){
+
+function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  const backup={exportedAt:new Date().toISOString(), ...state};
+  const backup = { exportedAt: new Date().toISOString(), ...state };
   localStorage.setItem(AUTO_BACKUP_KEY, JSON.stringify(backup));
 }
-function loadState(){
-  const raw=localStorage.getItem(STORAGE_KEY);
-  if(raw){
-    try{
-      state=JSON.parse(raw);
-      if(!state || !Array.isArray(state.prayers) || !Array.isArray(state.notes)) throw new Error("bad");
-    }catch(e){
-      state=buildInitialState();
+
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    try {
+      state = JSON.parse(raw);
+      if (!state || !Array.isArray(state.prayers) || !Array.isArray(state.notes)) throw new Error("bad");
+    } catch (e) {
+      state = buildInitialState();
       saveState();
     }
-  }else{
-    state=buildInitialState();
+  } else {
+    state = buildInitialState();
     saveState();
   }
-  section=state.section || "prayers";
+  section = state.section || "prayers";
 }
-function restoreAutoBackup(){
-  const raw=localStorage.getItem(AUTO_BACKUP_KEY);
-  if(!raw) return alert("No hay backup automático.");
-  if(!confirm("¿Restaurar el backup automático?")) return;
-  try{
-    const parsed=JSON.parse(raw);
-    state={
+
+function restoreAutoBackup() {
+  const raw = localStorage.getItem(AUTO_BACKUP_KEY);
+  if (!raw) return alert("No hay backup automático.");
+  if (!confirm("¿Restaurar el backup automático?")) return;
+  try {
+    const parsed = JSON.parse(raw);
+    state = {
       section: parsed.section || "prayers",
       currentPrayerId: parsed.currentPrayerId || null,
       currentNoteId: parsed.currentNoteId || null,
-      prayers: Array.isArray(parsed.prayers)?parsed.prayers:[],
-      notes: Array.isArray(parsed.notes)?parsed.notes:[],
-      trashPrayers: Array.isArray(parsed.trashPrayers)?parsed.trashPrayers:[],
-      trashNotes: Array.isArray(parsed.trashNotes)?parsed.trashNotes:[]
+      prayers: Array.isArray(parsed.prayers) ? parsed.prayers : [],
+      notes: Array.isArray(parsed.notes) ? parsed.notes : [],
+      trashPrayers: Array.isArray(parsed.trashPrayers) ? parsed.trashPrayers : [],
+      trashNotes: Array.isArray(parsed.trashNotes) ? parsed.trashNotes : []
     };
     saveState();
-    section=state.section;
+    section = state.section;
     syncTabs();
     renderList();
     renderReader();
     openReader();
     toast("Backup automático restaurado");
-  }catch(e){
+  } catch (e) {
     alert("No se pudo restaurar.");
   }
 }
-function applyTheme(){ if(localStorage.getItem(THEME_KEY)==="dark") document.body.classList.add("dark"); }
-function toggleTheme(){
+
+function resetApp() {
+  if (!confirm("Esto reiniciará la app y dejará solo una oración y una nota iniciales. ¿Continuar?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(AUTO_BACKUP_KEY);
+  state = buildInitialState();
+  saveState();
+  section = "prayers";
+  syncTabs();
+  renderList();
+  renderReader();
+  openReader();
+  toast("App reiniciada");
+}
+
+function applyTheme() {
+  if (localStorage.getItem(THEME_KEY) === "dark") document.body.classList.add("dark");
+}
+
+function toggleTheme() {
   document.body.classList.toggle("dark");
   localStorage.setItem(THEME_KEY, document.body.classList.contains("dark") ? "dark" : "light");
 }
-function syncTabs(){
-  document.getElementById("tabPrayers").classList.toggle("active", section==="prayers");
-  document.getElementById("tabNotes").classList.toggle("active", section==="notes");
-  document.getElementById("search").placeholder = section==="prayers" ? "Buscar oración..." : "Buscar nota...";
+
+function syncTabs() {
+  document.getElementById("tabPrayers").classList.toggle("active", section === "prayers");
+  document.getElementById("tabNotes").classList.toggle("active", section === "notes");
+  document.getElementById("search").placeholder = section === "prayers" ? "Buscar oración..." : "Buscar nota...";
 }
-function switchSection(next){
-  section=next;
-  state.section=next;
+
+function switchSection(next) {
+  section = next;
+  state.section = next;
   saveState();
   syncTabs();
   renderList();
   renderReader();
   openReader();
 }
-function getItems(){ return section==="prayers" ? state.prayers : state.notes; }
-function setItems(items){ if(section==="prayers") state.prayers=items; else state.notes=items; }
-function getTrash(){ return section==="prayers" ? state.trashPrayers : state.trashNotes; }
-function setTrash(items){ if(section==="prayers") state.trashPrayers=items; else state.trashNotes=items; }
-function currentItem(){
-  const items=getItems();
-  const id=section==="prayers" ? state.currentPrayerId : state.currentNoteId;
-  return items.find(x=>x.id===id) || items[0] || null;
+
+function getItems() {
+  return section === "prayers" ? state.prayers : state.notes;
 }
-function setCurrentId(id){
-  if(section==="prayers") state.currentPrayerId=id;
-  else state.currentNoteId=id;
+
+function setItems(items) {
+  if (section === "prayers") state.prayers = items;
+  else state.notes = items;
+}
+
+function getTrash() {
+  return section === "prayers" ? state.trashPrayers : state.trashNotes;
+}
+
+function setTrash(items) {
+  if (section === "prayers") state.trashPrayers = items;
+  else state.trashNotes = items;
+}
+
+function currentItem() {
+  const items = getItems();
+  const id = section === "prayers" ? state.currentPrayerId : state.currentNoteId;
+  return items.find(x => x.id === id) || items[0] || null;
+}
+
+function setCurrentId(id) {
+  if (section === "prayers") state.currentPrayerId = id;
+  else state.currentNoteId = id;
   saveState();
 }
-function escapeHtml(str){
-  return str.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+
+function escapeHtml(str) {
+  return str
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
-function renderList(){
-  const q=document.getElementById("search").value.trim().toLowerCase();
-  const list=document.getElementById("list");
-  list.innerHTML="";
-  const items=[...getItems()].sort((a,b)=>(b.favorite===true)-(a.favorite===true) || b.updatedAt-a.updatedAt).filter(item=>item.title.toLowerCase().includes(q)||item.content.toLowerCase().includes(q));
-  if(!items.length){
-    list.innerHTML='<div class="empty">No hay elementos.</div>';
+
+function renderList() {
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  const items = [...getItems()]
+    .sort((a, b) => (b.favorite === true) - (a.favorite === true) || b.updatedAt - a.updatedAt)
+    .filter(item => item.title.toLowerCase().includes(q) || item.content.toLowerCase().includes(q));
+
+  if (!items.length) {
+    list.innerHTML = '<div class="empty">No hay elementos.</div>';
     return;
   }
-  const current=currentItem();
-  items.forEach(item=>{
-    const div=document.createElement("div");
-    div.className="item"+(current && item.id===current.id ? " active":"");
-    const preview=item.content.trim().replace(/\n+/g," ").slice(0,70)||"Sin contenido";
-    div.innerHTML='<div class="item-title-row"><div class="item-title">'+escapeHtml(item.title||"Sin título")+'</div><div class="fav">'+(item.favorite?'⭐':'')+'</div></div><div class="item-sub">'+escapeHtml(preview)+'</div>';
-    div.onclick=()=>{ setCurrentId(item.id); renderList(); renderReader(); openReader(); };
+
+  const current = currentItem();
+  items.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "item" + (current && item.id === current.id ? " active" : "");
+    const preview = item.content.trim().replace(/\n+/g, " ").slice(0, 70) || "Sin contenido";
+    div.innerHTML = '<div class="item-title-row"><div class="item-title">' + escapeHtml(item.title || "Sin título") + '</div><div class="fav">' + (item.favorite ? '⭐' : '') + '</div></div><div class="item-sub">' + escapeHtml(preview) + '</div>';
+    div.onclick = () => {
+      setCurrentId(item.id);
+      renderList();
+      renderReader();
+      openReader();
+    };
     list.appendChild(div);
   });
 }
-function renderReader(){
-  const item=currentItem();
-  if(!item) return;
-  document.getElementById("readerTitle").textContent=item.favorite?'⭐ '+item.title:item.title;
-  document.getElementById("readerText").textContent=item.content;
-  document.getElementById("readerText").style.fontSize=readerSize+"px";
+
+function renderReader() {
+  const item = currentItem();
+  if (!item) return;
+  document.getElementById("readerTitle").textContent = item.favorite ? '⭐ ' + item.title : item.title;
+  document.getElementById("readerText").textContent = item.content;
+  document.getElementById("readerText").style.fontSize = readerSize + "px";
 }
-function openReader(){
+
+function openReader() {
   document.getElementById("readerView").classList.remove("hidden");
   document.getElementById("editorView").classList.add("hidden");
   document.getElementById("backupView").classList.add("hidden");
   document.getElementById("trashView").classList.add("hidden");
-  document.body.classList.remove("fullscreen-reading","hide-reading-ui");
-  if(window.innerWidth<=860) document.body.classList.add("reading-mobile");
+  document.body.classList.remove("fullscreen-reading", "hide-reading-ui");
+  if (window.innerWidth <= 860) document.body.classList.add("reading-mobile");
   else document.body.classList.remove("reading-mobile");
 }
-function openList(){
-  document.body.classList.remove("reading-mobile","fullscreen-reading","hide-reading-ui");
+
+function openList() {
+  document.body.classList.remove("reading-mobile", "fullscreen-reading", "hide-reading-ui");
   document.getElementById("search").focus();
 }
-function enterFullscreenReading(){
+
+function enterFullscreenReading() {
   document.getElementById("readerView").classList.remove("hidden");
   document.getElementById("editorView").classList.add("hidden");
   document.getElementById("backupView").classList.add("hidden");
   document.getElementById("trashView").classList.add("hidden");
   document.body.classList.add("fullscreen-reading");
-  document.body.classList.remove("reading-mobile","hide-reading-ui");
-  window.scrollTo({top:0,behavior:"smooth"});
+  document.body.classList.remove("reading-mobile", "hide-reading-ui");
+  window.scrollTo({ top: 0, behavior: "smooth" });
   toast("Pantalla completa");
 }
-function exitFullscreenReading(){
-  document.body.classList.remove("fullscreen-reading","hide-reading-ui");
+
+function exitFullscreenReading() {
+  document.body.classList.remove("fullscreen-reading", "hide-reading-ui");
   openReader();
 }
-function toggleReadingUI(){
-  if(!document.body.classList.contains("fullscreen-reading")) return;
+
+function toggleReadingUI() {
+  if (!document.body.classList.contains("fullscreen-reading")) return;
   document.body.classList.toggle("hide-reading-ui");
 }
-function openEditor(){
-  const item=currentItem();
-  if(!item) return;
-  document.getElementById("editTitle").value=item.title;
-  document.getElementById("editText").value=item.content;
+
+function openEditor() {
+  const item = currentItem();
+  if (!item) return;
+  document.getElementById("editTitle").value = item.title;
+  document.getElementById("editText").value = item.content;
   document.getElementById("editorView").classList.remove("hidden");
   document.getElementById("readerView").classList.add("hidden");
   document.getElementById("backupView").classList.add("hidden");
   document.getElementById("trashView").classList.add("hidden");
-  document.body.classList.remove("reading-mobile","fullscreen-reading","hide-reading-ui");
+  document.body.classList.remove("reading-mobile", "fullscreen-reading", "hide-reading-ui");
 }
-function saveAndBack(){
-  const item=currentItem();
-  if(!item) return;
-  item.title=document.getElementById("editTitle").value.trim() || "Sin título";
-  item.content=document.getElementById("editText").value;
-  item.updatedAt=Date.now();
+
+function saveAndBack() {
+  const item = currentItem();
+  if (!item) return;
+  item.title = document.getElementById("editTitle").value.trim() || "Sin título";
+  item.content = document.getElementById("editText").value;
+  item.updatedAt = Date.now();
   saveState();
   renderList();
   renderReader();
   openReader();
   toast("Guardado");
 }
-function newItem(){
-  const id=uid();
-  const title=section==="prayers" ? "Nueva oración" : "Nueva nota";
-  const entry={id:id,title:title,content:"",updatedAt:Date.now(),favorite:false};
-  const items=getItems();
+
+function newItem() {
+  const id = uid();
+  const title = section === "prayers" ? "Nueva oración" : "Nueva nota";
+  const entry = { id, title, content: "", updatedAt: Date.now(), favorite: false };
+  const items = getItems();
   items.unshift(entry);
   setItems(items);
   setCurrentId(id);
@@ -365,53 +450,57 @@ function newItem(){
   renderReader();
   openEditor();
 }
-function moveToTrash(){
-  const item=currentItem();
-  if(!item) return;
-  const items=getItems();
-  if(items.length===1) return alert("Debe quedar al menos un elemento.");
-  const typeName=section==="prayers" ? "oración" : "nota";
-  if(!confirm('¿Mover a papelera esta '+typeName+'?\n"'+item.title+'"')) return;
-  const trash=getTrash();
-  trash.unshift({...item,deletedAt:Date.now()});
-  const filtered=items.filter(x=>x.id!==item.id);
+
+function moveToTrash() {
+  const item = currentItem();
+  if (!item) return;
+  const items = getItems();
+  if (items.length === 1) return alert("Debe quedar al menos un elemento.");
+  const typeName = section === "prayers" ? "oración" : "nota";
+  if (!confirm('¿Mover a papelera esta ' + typeName + '?\n"' + item.title + '"')) return;
+  const trash = getTrash();
+  trash.unshift({ ...item, deletedAt: Date.now() });
+  const filtered = items.filter(x => x.id !== item.id);
   setItems(filtered);
-  if(section==="prayers") state.currentPrayerId=filtered[0].id;
-  else state.currentNoteId=filtered[0].id;
+  if (section === "prayers") state.currentPrayerId = filtered[0].id;
+  else state.currentNoteId = filtered[0].id;
   saveState();
   renderList();
   renderReader();
   openReader();
   toast("Movido a papelera");
 }
-function openTrash(){
+
+function openTrash() {
   document.getElementById("trashView").classList.remove("hidden");
   document.getElementById("readerView").classList.add("hidden");
   document.getElementById("editorView").classList.add("hidden");
   document.getElementById("backupView").classList.add("hidden");
   renderTrash();
 }
-function renderTrash(){
-  const box=document.getElementById("trashList");
-  box.innerHTML="";
-  const trash=getTrash();
-  if(!trash.length){
-    box.innerHTML='<div class="empty">La papelera está vacía.</div>';
+
+function renderTrash() {
+  const box = document.getElementById("trashList");
+  box.innerHTML = "";
+  const trash = getTrash();
+  if (!trash.length) {
+    box.innerHTML = '<div class="empty">La papelera está vacía.</div>';
     return;
   }
-  trash.forEach(item=>{
-    const div=document.createElement("div");
-    div.className="trash-item";
-    div.innerHTML='<div class="trash-title">'+escapeHtml(item.title||"Sin título")+'</div><div class="row"><button class="btn soft" onclick="restoreFromTrash(\\''+item.id+'\\')">Restaurar</button><button class="btn danger" onclick="deleteForever(\\''+item.id+'\\')">Borrar definitivo</button></div>';
+  trash.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "trash-item";
+    div.innerHTML = '<div class="trash-title">' + escapeHtml(item.title || "Sin título") + '</div><div class="row"><button class="btn soft" type="button" onclick="restoreFromTrash(\'' + item.id + '\')">Restaurar</button><button class="btn danger" type="button" onclick="deleteForever(\'' + item.id + '\')">Borrar definitivo</button></div>';
     box.appendChild(div);
   });
 }
-function restoreFromTrash(id){
-  const trash=getTrash();
-  const idx=trash.findIndex(x=>x.id===id);
-  if(idx<0) return;
-  const item=trash.splice(idx,1)[0];
-  const items=getItems();
+
+function restoreFromTrash(id) {
+  const trash = getTrash();
+  const idx = trash.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  const item = trash.splice(idx, 1)[0];
+  const items = getItems();
   items.unshift(item);
   setItems(items);
   setCurrentId(item.id);
@@ -421,86 +510,104 @@ function restoreFromTrash(id){
   renderTrash();
   toast("Restaurado");
 }
-function deleteForever(id){
-  const trash=getTrash();
-  const item=trash.find(x=>x.id===id);
-  if(!item) return;
-  if(!confirm('¿Borrar definitivamente "'+item.title+'"?')) return;
-  setTrash(trash.filter(x=>x.id!==id));
+
+function deleteForever(id) {
+  const trash = getTrash();
+  const item = trash.find(x => x.id === id);
+  if (!item) return;
+  if (!confirm('¿Borrar definitivamente "' + item.title + '"?')) return;
+  setTrash(trash.filter(x => x.id !== id));
   saveState();
   renderTrash();
   toast("Borrado definitivo");
 }
-function emptyTrash(){
-  const trash=getTrash();
-  if(!trash.length) return alert("La papelera ya está vacía.");
-  if(!confirm("¿Vaciar toda la papelera? Esta acción no se puede deshacer.")) return;
+
+function emptyTrash() {
+  const trash = getTrash();
+  if (!trash.length) return alert("La papelera ya está vacía.");
+  if (!confirm("¿Vaciar toda la papelera? Esta acción no se puede deshacer.")) return;
   setTrash([]);
   saveState();
   renderTrash();
   toast("Papelera vaciada");
 }
-function copyCurrent(){
-  const item=currentItem();
-  if(!item) return;
-  navigator.clipboard.writeText(item.content).then(()=>toast("Copiado")).catch(()=>alert("No se pudo copiar."));
+
+function copyCurrent() {
+  const item = currentItem();
+  if (!item) return;
+  navigator.clipboard.writeText(item.content).then(() => toast("Copiado")).catch(() => alert("No se pudo copiar."));
 }
-function toggleFavorite(){
-  const item=currentItem();
-  if(!item) return;
-  item.favorite=!item.favorite;
-  item.updatedAt=Date.now();
+
+function toggleFavorite() {
+  const item = currentItem();
+  if (!item) return;
+  item.favorite = !item.favorite;
+  item.updatedAt = Date.now();
   saveState();
   renderList();
   renderReader();
   toast(item.favorite ? "Marcado como favorito" : "Quitado de favoritos");
 }
-function changeReaderSize(delta){
-  readerSize+=delta;
-  if(readerSize<20) readerSize=20;
-  if(readerSize>34) readerSize=34;
+
+function changeReaderSize(delta) {
+  readerSize += delta;
+  if (readerSize < 20) readerSize = 20;
+  if (readerSize > 34) readerSize = 34;
   localStorage.setItem(SIZE_KEY, String(readerSize));
   renderReader();
 }
-function openBackup(){
+
+function openBackup() {
   document.getElementById("backupView").classList.remove("hidden");
   document.getElementById("readerView").classList.add("hidden");
   document.getElementById("editorView").classList.add("hidden");
   document.getElementById("trashView").classList.add("hidden");
 }
-function downloadTextFile(filename,text){
-  try{
-    const blob=new Blob([text],{type:"application/json;charset=utf-8"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url; a.download=filename;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(url),1200);
-  }catch(e){}
+
+function downloadTextFile(filename, text) {
+  try {
+    const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1200);
+  } catch (e) {}
 }
-async function shareBackup(text){
-  if(navigator.share){
-    try{ await navigator.share({title:"Backup Oraciones y Notas", text:text}); }catch(e){}
+
+async function shareBackup(text) {
+  if (navigator.share) {
+    try { await navigator.share({ title: "Backup Oraciones y Notas", text }); } catch (e) {}
   }
 }
-async function exportBackup(){
-  const payload={exportedAt:new Date().toISOString(), ...state};
-  const text=JSON.stringify(payload,null,2);
-  document.getElementById("backupText").value=text;
-  const now=new Date();
-  const stamp=now.getFullYear().toString()+String(now.getMonth()+1).padStart(2,"0")+String(now.getDate()).padStart(2,"0")+"_"+String(now.getHours()).padStart(2,"0")+String(now.getMinutes()).padStart(2,"0");
-  downloadTextFile("backup_oraciones_notas_"+stamp+".json", text);
-  try{ await navigator.clipboard.writeText(text); }catch(e){}
+
+async function exportBackup() {
+  const payload = { exportedAt: new Date().toISOString(), ...state };
+  const text = JSON.stringify(payload, null, 2);
+  document.getElementById("backupText").value = text;
+  const now = new Date();
+  const stamp = now.getFullYear().toString()
+    + String(now.getMonth() + 1).padStart(2, "0")
+    + String(now.getDate()).padStart(2, "0")
+    + "_"
+    + String(now.getHours()).padStart(2, "0")
+    + String(now.getMinutes()).padStart(2, "0");
+  downloadTextFile("backup_oraciones_notas_" + stamp + ".json", text);
+  try { await navigator.clipboard.writeText(text); } catch (e) {}
   await shareBackup(text);
   toast("Backup listo: descargar + copiar + compartir");
 }
-function importBackup(){
-  const text=document.getElementById("backupText").value.trim();
-  if(!text) return alert("Pega primero una copia.");
-  try{
-    const parsed=JSON.parse(text);
-    if(!Array.isArray(parsed.prayers) || !Array.isArray(parsed.notes)) throw new Error("bad");
-    state={
+
+function importBackup() {
+  const text = document.getElementById("backupText").value.trim();
+  if (!text) return alert("Pega primero una copia.");
+  try {
+    const parsed = JSON.parse(text);
+    if (!Array.isArray(parsed.prayers) || !Array.isArray(parsed.notes)) throw new Error("bad");
+    state = {
       section: parsed.section || "prayers",
       currentPrayerId: parsed.currentPrayerId || (parsed.prayers[0] && parsed.prayers[0].id),
       currentNoteId: parsed.currentNoteId || (parsed.notes[0] && parsed.notes[0].id),
@@ -510,48 +617,57 @@ function importBackup(){
       trashNotes: Array.isArray(parsed.trashNotes) ? parsed.trashNotes : []
     };
     saveState();
-    section=state.section;
+    section = state.section;
     syncTabs();
     renderList();
     renderReader();
     openReader();
     toast("Backup importado");
-  }catch(e){
+  } catch (e) {
     alert("La copia no es válida.");
   }
 }
-function dismissInstall(){
-  localStorage.setItem(INSTALL_DISMISSED_KEY,"1");
+
+function dismissInstall() {
+  localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
   document.getElementById("installBanner").classList.add("hidden");
 }
-function maybeShowInstall(){
-  if(localStorage.getItem(INSTALL_DISMISSED_KEY)==="1") return;
-  if(deferredPrompt) document.getElementById("installBanner").classList.remove("hidden");
+
+function maybeShowInstall() {
+  if (localStorage.getItem(INSTALL_DISMISSED_KEY) === "1") return;
+  if (deferredPrompt) document.getElementById("installBanner").classList.remove("hidden");
 }
-window.addEventListener("beforeinstallprompt", e=>{
+
+window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
-  deferredPrompt=e;
+  deferredPrompt = e;
   maybeShowInstall();
 });
-document.addEventListener("DOMContentLoaded", ()=>{
-  document.getElementById("installBtn").addEventListener("click", async ()=>{
-    if(!deferredPrompt){
-      toast("Abre el menú del navegador y prueba instalar o añadir a inicio");
-      return;
-    }
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt=null;
-    document.getElementById("installBanner").classList.add("hidden");
-  });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("installBtn");
+  if (btn) {
+    btn.addEventListener("click", async () => {
+      if (!deferredPrompt) {
+        toast("Abre el menú del navegador y prueba instalar o añadir a inicio");
+        return;
+      }
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      document.getElementById("installBanner").classList.add("hidden");
+    });
+  }
 });
-window.addEventListener("appinstalled", ()=>{
+
+window.addEventListener("appinstalled", () => {
   document.getElementById("installBanner").classList.add("hidden");
   toast("App instalada");
 });
-if("serviceWorker" in navigator){
-  window.addEventListener("load", ()=>{
-    navigator.serviceWorker.register("sw.js?v="+APP_VERSION);
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js");
   });
 }
 

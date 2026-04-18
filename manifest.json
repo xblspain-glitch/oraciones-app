@@ -1,21 +1,21 @@
 {
   "name": "Oraciones y Notas",
   "short_name": "Oraciones",
-  "id": "/oraciones-app/?app=final_10138e8140",
-  "start_url": "/oraciones-app/?app=final_10138e8140",
+  "id": "/oraciones-app/",
+  "start_url": "/oraciones-app/",
   "scope": "/oraciones-app/",
   "display": "standalone",
   "background_color": "#111111",
   "theme_color": "#111111",
   "icons": [
     {
-      "src": "icon-192.png?v=final_10138e8140",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png?v=final_10138e8140",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
