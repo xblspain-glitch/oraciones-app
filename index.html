@@ -126,6 +126,7 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
         <button class="btn soft" type="button" onclick="changeReaderSize(1)">A+</button>
         <button class="btn soft" type="button" onclick="copyCurrent()">📋 Copiar</button>
         <button class="btn soft" type="button" onclick="toggleFavorite()">⭐</button>
+        <button class="btn soft" type="button" onclick="exportCurrentHTML()">🌐 Exportar lectura</button>
       </div>
       <div id="readerTitle" class="reader-title"></div>
       <div id="readerText" class="reader-text" onclick="toggleReadingUI()"></div>
@@ -148,6 +149,7 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
         <button class="btn primary" type="button" onclick="exportBackup()">⬇ Exportar</button>
         <button class="btn soft" type="button" onclick="importBackup()">⬆ Importar</button>
         <button class="btn soft" type="button" onclick="restoreAutoBackup()">♻️ Recuperar automático</button>
+        <button class="btn soft" type="button" onclick="exportAllZip()">📦 Exportar todo ZIP</button>
       </div>
       <textarea id="backupText" class="backup-text" placeholder="Aquí aparecerá tu copia de seguridad. También puedes pegar aquí una copia para importar."></textarea>
       <div class="small-note">El backup incluye oraciones, notas, las dos papeleras y además se guarda una copia automática local en cada cambio.</div>
@@ -165,23 +167,21 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 
 <div id="toast" class="toast">Guardado</div>
 
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
-const STORAGE_KEY="oraciones_orden_original_instalar_v1";
-const AUTO_BACKUP_KEY="oraciones_orden_original_instalar_auto_backup_v1";
-const THEME_KEY="oraciones_orden_original_instalar_theme_v1";
-const SIZE_KEY="oraciones_orden_original_instalar_reader_size_v1";
-const INSTALL_DISMISSED_KEY="oraciones_orden_original_instalar_dismiss_v1";
-
+const STORAGE_KEY="oraciones_export_html_zip_v1";
+const AUTO_BACKUP_KEY="oraciones_export_html_zip_auto_backup_v1";
+const THEME_KEY="oraciones_export_html_zip_theme_v1";
+const SIZE_KEY="oraciones_export_html_zip_reader_size_v1";
+const INSTALL_DISMISSED_KEY="oraciones_export_html_zip_dismiss_v1";
 let deferredPrompt=null;
 let readerSize=parseInt(localStorage.getItem(SIZE_KEY)||"24",10);
 let section="prayers";
 let state={"section":"prayers","currentPrayerId":null,"currentNoteId":null,"prayers":[],"notes":[],"trashPrayers":[],"trashNotes":[]};
 let isDirty=false;
 let autosaveTimer=null;
-
 const seedPrayer="\ud83c\udf05 \u271d\ufe0f Oraci\u00f3n diaria completa\n\nSe\u00f1or Dios Todopoderoso,\ndamos gracias por este nuevo d\u00eda que me concede.\n\nDamos gracias por la vida que me ha dado,\npor el regalo de la vida, desde la creaci\u00f3n y el nacimiento,\nhasta el regalo de la vida eterna.\n\nPor ser el centro de mi vida,\npor llevar las riendas de mi vida\ny darle sentido.\n";
 const seedNote="Aqu\u00ed puedes guardar ideas, reflexiones, vers\u00edculos sueltos o recordatorios.";
-
 function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true}
 function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>el.classList.remove("show"),1300)}
 function setSaveStatus(msg){const el=document.getElementById("saveStatus");if(el) el.textContent=msg}
@@ -200,7 +200,8 @@ function getTrash(){return section==="prayers"?state.trashPrayers:state.trashNot
 function setTrash(items){if(section==="prayers") state.trashPrayers=items;else state.trashNotes=items}
 function currentItem(){const items=getItems();const id=section==="prayers"?state.currentPrayerId:state.currentNoteId;return items.find(x=>x.id===id)||items[0]||null}
 function setCurrentId(id){if(section==="prayers") state.currentPrayerId=id;else state.currentNoteId=id;saveState()}
-function escapeHtml(str){return str.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function escapeHtml(str){return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function slugify(str){return String(str).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\s-]/g,"").trim().replace(/\s+/g,"-").toLowerCase() || "sin-titulo"}
 function renderList(){const q=document.getElementById("search").value.trim().toLowerCase(),list=document.getElementById("list");list.innerHTML="";const items=[...getItems()].sort((a,b)=>(b.favorite===true)-(a.favorite===true)||b.updatedAt-a.updatedAt).filter(item=>item.title.toLowerCase().includes(q)||item.content.toLowerCase().includes(q));if(!items.length){list.innerHTML='<div class="empty">No hay elementos.</div>';return}const current=currentItem();items.forEach(item=>{const div=document.createElement("div");div.className="item"+(current&&item.id===current.id?" active":"");const preview=item.content.trim().replace(/\n+/g," ").slice(0,70)||"Sin contenido";div.innerHTML='<div class="item-title-row"><div class="item-title">'+escapeHtml(item.title||"Sin título")+'</div><div class="fav">'+(item.favorite?'⭐':'')+'</div></div><div class="item-sub">'+escapeHtml(preview)+'</div>';div.onclick=()=>{if(!document.getElementById("editorView").classList.contains("hidden")) saveCurrent(false,true);setCurrentId(item.id);renderList();renderReader();openReader()};list.appendChild(div)})}
 function renderReader(){const item=currentItem();if(!item) return;document.getElementById("readerTitle").textContent=item.favorite?'⭐ '+item.title:item.title;document.getElementById("readerText").textContent=item.content;document.getElementById("readerText").style.fontSize=readerSize+"px"}
 function openReader(){document.getElementById("readerView").classList.remove("hidden");document.getElementById("editorView").classList.add("hidden");document.getElementById("backupView").classList.add("hidden");document.getElementById("trashView").classList.add("hidden");document.body.classList.remove("fullscreen-reading","hide-reading-ui");if(window.innerWidth<=860) document.body.classList.add("reading-mobile");else document.body.classList.remove("reading-mobile")}
@@ -223,8 +224,11 @@ function copyCurrent(){const item=currentItem();if(!item) return;navigator.clipb
 function toggleFavorite(){const item=currentItem();if(!item) return;item.favorite=!item.favorite;item.updatedAt=Date.now();saveState();renderList();renderReader();toast(item.favorite?"Marcado como favorito":"Quitado de favoritos")}
 function changeReaderSize(delta){readerSize+=delta;if(readerSize<20) readerSize=20;if(readerSize>34) readerSize=34;localStorage.setItem(SIZE_KEY, String(readerSize));renderReader()}
 function openBackup(){document.getElementById("backupView").classList.remove("hidden");document.getElementById("readerView").classList.add("hidden");document.getElementById("editorView").classList.add("hidden");document.getElementById("trashView").classList.add("hidden")}
-function downloadTextFile(filename,text){try{const blob=new Blob([text],{type:"application/json;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1200)}catch(e){}}
-async function exportBackup(){const payload={"exportedAt":new Date().toISOString(),...state};const text=JSON.stringify(payload,null,2);document.getElementById("backupText").value=text;const now=new Date();const stamp=now.getFullYear().toString()+String(now.getMonth()+1).padStart(2,"0")+String(now.getDate()).padStart(2,"0")+"_"+String(now.getHours()).padStart(2,"0")+String(now.getMinutes()).padStart(2,"0");downloadTextFile("backup_oraciones_notas_"+stamp+".json",text);try{await navigator.clipboard.writeText(text)}catch(e){}if(navigator.share){try{await navigator.share({title:"Backup Oraciones y Notas", text:text})}catch(e){}}toast("Backup listo")}
+function downloadBlob(filename, blob){const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500)}
+function buildReadingHTML(item, folderLabel){const title=item.favorite?'⭐ '+item.title:item.title;const bg=document.body.classList.contains("dark") ? "#111111" : "#f8f6f1";const card=document.body.classList.contains("dark") ? "#1a1a1a" : "#ffffff";const text=document.body.classList.contains("dark") ? "#f2eee7" : "#181818";return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"><title>${escapeHtml(item.title)}</title><style>body{margin:0;background:${bg};color:${text};font-family:Arial,sans-serif}.wrap{max-width:900px;margin:0 auto;padding:24px}.card{background:${card};border-radius:20px;padding:24px}.badge{font-size:13px;opacity:.7;margin-bottom:10px}h1{font-size:24px;margin:0 0 18px 0}.content{white-space:pre-wrap;font-size:${readerSize}px;line-height:2.05}</style></head><body><div class="wrap"><div class="card"><div class="badge">${escapeHtml(folderLabel)}</div><h1>${escapeHtml(title)}</h1><div class="content">${escapeHtml(item.content)}</div></div></div></body></html>`}
+async function exportCurrentHTML(){const item=currentItem();if(!item) return;const label=section==="prayers"?"Oración":"Nota";const html=buildReadingHTML(item,label);const filename=slugify(item.title)+".html";downloadBlob(filename, new Blob([html],{type:"text/html;charset=utf-8"}));if(navigator.share){try{const file=new File([html], filename, {type:"text/html"});await navigator.share({title:item.title, files:[file]})}catch(e){}}toast("Lectura exportada")}
+async function exportAllZip(){if(typeof JSZip==="undefined"){alert("No se pudo cargar el exportador ZIP.");return}const zip=new JSZip();const payload={"exportedAt":new Date().toISOString(),...state};zip.file("backup.json", JSON.stringify(payload,null,2));const folders=[["oraciones", state.prayers, "Oración"],["notas", state.notes, "Nota"],["papelera/oraciones", state.trashPrayers, "Oración eliminada"],["papelera/notas", state.trashNotes, "Nota eliminada"]];folders.forEach(([folder, items, label])=>{items.forEach((item, idx)=>{const name=(slugify(item.title)||("item-"+idx))+".html";zip.folder(folder).file(name, buildReadingHTML(item,label))})});const blob=await zip.generateAsync({type:"blob"});downloadBlob("exportacion_oraciones_notas.zip", blob);toast("ZIP exportado")}
+async function exportBackup(){const payload={"exportedAt":new Date().toISOString(),...state};const text=JSON.stringify(payload,null,2);document.getElementById("backupText").value=text;const now=new Date();const stamp=now.getFullYear().toString()+String(now.getMonth()+1).padStart(2,"0")+String(now.getDate()).padStart(2,"0")+"_"+String(now.getHours()).padStart(2,"0")+String(now.getMinutes()).padStart(2,"0");downloadBlob("backup_oraciones_notas_"+stamp+".json", new Blob([text],{type:"application/json;charset=utf-8"}));try{await navigator.clipboard.writeText(text)}catch(e){}if(navigator.share){try{await navigator.share({title:"Backup Oraciones y Notas", text:text})}catch(e){}}toast("Backup listo")}
 function importBackup(){const text=document.getElementById("backupText").value.trim();if(!text) return alert("Pega primero una copia.");try{const parsed=JSON.parse(text);if(!Array.isArray(parsed.prayers)||!Array.isArray(parsed.notes)) throw new Error("bad");state={"section":parsed.section||"prayers","currentPrayerId":parsed.currentPrayerId||(parsed.prayers[0]&&parsed.prayers[0].id),"currentNoteId":parsed.currentNoteId||(parsed.notes[0]&&parsed.notes[0].id),"prayers":parsed.prayers,"notes":parsed.notes,"trashPrayers":Array.isArray(parsed.trashPrayers)?parsed.trashPrayers:[],"trashNotes":Array.isArray(parsed.trashNotes)?parsed.trashNotes:[]};saveState();section=state.section;syncTabs();renderList();renderReader();openReader();toast("Backup importado")}catch(e){alert("La copia no es válida.")}}
 function dismissInstall(){localStorage.setItem(INSTALL_DISMISSED_KEY,"1");document.getElementById("installBanner").classList.add("hidden")}
 function maybeShowInstall(){if(isStandalone()) return;if(localStorage.getItem(INSTALL_DISMISSED_KEY)==="1") return;document.getElementById("installBanner").classList.remove("hidden");const help=document.getElementById("installHelp");if(deferredPrompt) help.textContent="Pulsa Instalar. Si no te deja, usa el menú del navegador y elige Añadir a pantalla de inicio.";else help.textContent="Si no aparece el instalador automático, usa el menú del navegador y elige Añadir a pantalla de inicio."}
@@ -232,7 +236,6 @@ window.addEventListener("beforeinstallprompt", e=>{e.preventDefault();deferredPr
 document.addEventListener("DOMContentLoaded",()=>{document.getElementById("installBtn").addEventListener("click", async ()=>{if(!deferredPrompt){toast("Usa el menú del navegador: Añadir a pantalla de inicio");return}deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null;document.getElementById("installBanner").classList.add("hidden")});document.getElementById("editTitle").addEventListener("input",scheduleAutosave);document.getElementById("editText").addEventListener("input",scheduleAutosave);if(isStandalone()) document.body.classList.add("standalone")})
 window.addEventListener("appinstalled",()=>{document.getElementById("installBanner").classList.add("hidden");toast("App instalada")})
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js")})}
-
 applyTheme();loadState();syncTabs();renderList();renderReader();openReader();maybeShowInstall();
 </script>
 </body>
