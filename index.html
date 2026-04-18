@@ -24,6 +24,14 @@ body.dark{
 html,body{margin:0;min-height:100%}
 body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
 button,input,textarea{font-family:inherit}
+.splash{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200;transition:opacity .35s ease}
+.splash.hide{opacity:0;pointer-events:none}
+.splash-card{text-align:center}
+.splash-icon{width:84px;height:84px;border-radius:24px;background:#292016;display:flex;align-items:center;justify-content:center;margin:0 auto 14px auto;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.splash-cross{width:18px;height:54px;background:#fff7e8;border-radius:999px;position:relative}
+.splash-cross:after{content:"";position:absolute;left:-16px;top:18px;width:50px;height:18px;background:#fff7e8;border-radius:999px}
+.splash-title{font-weight:bold;font-size:22px}
+.splash-sub{color:var(--muted);margin-top:6px}
 .topbar{position:sticky;top:0;z-index:40;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;background:rgba(248,246,241,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 body.dark .topbar{background:rgba(17,17,17,.96)}
 .topbar-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -64,6 +72,15 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 .install-box{position:fixed;left:10px;right:10px;bottom:10px;z-index:100;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
 .install-title{font-weight:bold;margin-bottom:6px}
 .install-sub{color:var(--muted);font-size:13px;margin-bottom:10px}
+body.standalone .topbar{padding-top:calc(14px + env(safe-area-inset-top))}
+body.standalone .panel{border-radius:0;border:none}
+body.standalone .content{padding:0}
+body.standalone .main{grid-template-columns:280px 1fr}
+@media (display-mode: standalone){
+  body .topbar{padding-top:calc(14px + env(safe-area-inset-top))}
+  body .panel{border-radius:0;border:none}
+  body .content{padding:0}
+}
 @media (max-width:860px){
   .main{grid-template-columns:1fr}
   .sidebar{display:block;border-right:none;border-bottom:1px solid var(--line);max-height:34dvh}
@@ -79,9 +96,17 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 </style>
 </head>
 <body>
+<div id="splash" class="splash">
+  <div class="splash-card">
+    <div class="splash-icon"><div class="splash-cross"></div></div>
+    <div class="splash-title">Oraciones y Notas</div>
+    <div class="splash-sub">Abriendo…</div>
+  </div>
+</div>
+
 <div id="installBox" class="install-box hidden">
-  <div class="install-title">Instalar app</div>
-  <div id="installText" class="install-sub">Si no aparece el instalador automático, usa el menú del navegador y elige “Añadir a pantalla de inicio”.</div>
+  <div class="install-title">Modo app real</div>
+  <div id="installText" class="install-sub">Pulsa instalar si aparece. Si Chrome no lo permite, usa el menú del navegador y elige “Añadir a pantalla de inicio”. Luego ábrela siempre desde el icono.</div>
   <div class="row">
     <button id="installBtn" class="btn primary" type="button">Instalar</button>
     <button class="btn soft" type="button" onclick="hideInstallBox()">Cerrar</button>
@@ -97,7 +122,7 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 <button class="btn soft" type="button" onclick="openEditor()">✍️ Editar</button>
 <button class="btn soft" type="button" onclick="openBackup()">☁️ Backup</button>
 <button class="btn soft" type="button" onclick="openTrash()">🗑️ Papelera</button>
-<button class="btn soft" type="button" onclick="showInstallBox()">📲 Instalar</button>
+<button class="btn soft" type="button" onclick="showInstallBox()">📲 App real</button>
 <button class="btn soft" type="button" onclick="resetApp()">♻️ Reset</button>
 <button class="btn soft" type="button" onclick="toggleTheme()">🌙</button>
 <button class="btn danger" type="button" onclick="moveToTrash()">🗑️ Eliminar</button>
@@ -152,25 +177,29 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 <div id="toast" class="toast">Guardado</div>
 
 <script>
-const STORAGE_KEY = "oraciones_install_fix_v1";
-const AUTO_BACKUP_KEY = "oraciones_install_fix_auto_backup_v1";
-const THEME_KEY = "oraciones_install_fix_theme_v1";
+const STORAGE_KEY = "oraciones_modo_app_real_v1";
+const AUTO_BACKUP_KEY = "oraciones_modo_app_real_auto_backup_v1";
+const THEME_KEY = "oraciones_modo_app_real_theme_v1";
+
 let deferredPrompt = null;
 let section = "prayers";
-let state = {section:"prayers",currentPrayerId:null,currentNoteId:null,prayers:[],notes:[],trashPrayers:[],trashNotes:[]};
+let state = {"section":"prayers","currentPrayerId":null,"currentNoteId":null,"prayers":[],"notes":[],"trashPrayers":[],"trashNotes":[]};
 let isDirty = false;
 let autosaveTimer = null;
 
 const seedPrayer = "\ud83c\udf05 \u271d\ufe0f Oraci\u00f3n diaria completa\n\nSe\u00f1or Dios Todopoderoso,\ndamos gracias por este nuevo d\u00eda que me concede.\n\nDamos gracias por la vida que me ha dado,\npor el regalo de la vida, desde la creaci\u00f3n y el nacimiento,\nhasta el regalo de la vida eterna.\n\nPor ser el centro de mi vida,\npor llevar las riendas de mi vida\ny darle sentido.\n";
 const seedNote = "Aqu\u00ed puedes guardar ideas, reflexiones, vers\u00edculos sueltos o recordatorios.";
 
+function isStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
 function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>el.classList.remove("show"),1300)}
 function setSaveStatus(msg){const el=document.getElementById("saveStatus");if(el) el.textContent=msg}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
-function buildInitialState(){const prayerId=uid(),noteId=uid();return {section:"prayers",currentPrayerId:prayerId,currentNoteId:noteId,prayers:[{id:prayerId,title:"🌅 ✝️ Oración diaria completa",content:seedPrayer,updatedAt:Date.now(),favorite:true}],notes:[{id:noteId,title:"📝 Mi primera nota",content:seedNote,updatedAt:Date.now(),favorite:false}],trashPrayers:[],trashNotes:[]}}
-function saveState(){localStorage.setItem(STORAGE_KEY, JSON.stringify(state));const backup={exportedAt:new Date().toISOString(),...state};localStorage.setItem(AUTO_BACKUP_KEY, JSON.stringify(backup))}
+function buildInitialState(){const prayerId=uid(),noteId=uid();return {"section":"prayers","currentPrayerId":prayerId,"currentNoteId":noteId,"prayers":[{"id":prayerId,"title":"🌅 ✝️ Oración diaria completa","content":seedPrayer,"updatedAt":Date.now(),"favorite":true}],"notes":[{"id":noteId,"title":"📝 Mi primera nota","content":seedNote,"updatedAt":Date.now(),"favorite":false}],"trashPrayers":[],"trashNotes":[]}}
+function saveState(){localStorage.setItem(STORAGE_KEY, JSON.stringify(state));const backup={"exportedAt":new Date().toISOString(),...state};localStorage.setItem(AUTO_BACKUP_KEY, JSON.stringify(backup))}
 function loadState(){const raw=localStorage.getItem(STORAGE_KEY);if(raw){try{state=JSON.parse(raw);if(!state||!Array.isArray(state.prayers)||!Array.isArray(state.notes)) throw new Error("bad")}catch(e){state=buildInitialState();saveState()}}else{state=buildInitialState();saveState()}section=state.section||"prayers"}
-function restoreAutoBackup(){const raw=localStorage.getItem(AUTO_BACKUP_KEY);if(!raw) return alert("No hay backup automático.");if(!confirm("¿Restaurar el backup automático?")) return;try{const parsed=JSON.parse(raw);state={section:parsed.section||"prayers",currentPrayerId:parsed.currentPrayerId||null,currentNoteId:parsed.currentNoteId||null,prayers:Array.isArray(parsed.prayers)?parsed.prayers:[],notes:Array.isArray(parsed.notes)?parsed.notes:[],trashPrayers:Array.isArray(parsed.trashPrayers)?parsed.trashPrayers:[],trashNotes:Array.isArray(parsed.trashNotes)?parsed.trashNotes:[]};saveState();section=state.section;syncTabs();renderList();renderReader();openReader();toast("Backup automático restaurado")}catch(e){alert("No se pudo restaurar.")}}
+function restoreAutoBackup(){const raw=localStorage.getItem(AUTO_BACKUP_KEY);if(!raw) return alert("No hay backup automático.");if(!confirm("¿Restaurar el backup automático?")) return;try{const parsed=JSON.parse(raw);state={"section":parsed.section||"prayers","currentPrayerId":parsed.currentPrayerId||null,"currentNoteId":parsed.currentNoteId||null,"prayers":Array.isArray(parsed.prayers)?parsed.prayers:[],"notes":Array.isArray(parsed.notes)?parsed.notes:[],"trashPrayers":Array.isArray(parsed.trashPrayers)?parsed.trashPrayers:[],"trashNotes":Array.isArray(parsed.trashNotes)?parsed.trashNotes:[]};saveState();section=state.section;syncTabs();renderList();renderReader();openReader();toast("Backup automático restaurado")}catch(e){alert("No se pudo restaurar.")}}
 function resetApp(){if(!confirm("Esto reiniciará la app y dejará solo una oración y una nota iniciales. ¿Continuar?")) return;localStorage.removeItem(STORAGE_KEY);localStorage.removeItem(AUTO_BACKUP_KEY);state=buildInitialState();saveState();section="prayers";syncTabs();renderList();renderReader();openReader();toast("App reiniciada")}
 function applyTheme(){if(localStorage.getItem(THEME_KEY)==="dark") document.body.classList.add("dark")}
 function toggleTheme(){document.body.classList.toggle("dark");localStorage.setItem(THEME_KEY, document.body.classList.contains("dark")?"dark":"light")}
@@ -190,8 +219,8 @@ function openEditor(){const item=currentItem();if(!item) return;document.getElem
 function scheduleAutosave(){isDirty=true;setSaveStatus("Cambios sin guardar");if(autosaveTimer) clearTimeout(autosaveTimer);autosaveTimer=setTimeout(()=>saveCurrent(false,true),1200)}
 function saveCurrent(goBack=false,silent=false){const editor=document.getElementById("editorView");if(editor.classList.contains("hidden")) return;const item=currentItem();if(!item) return;item.title=document.getElementById("editTitle").value.trim()||"Sin título";item.content=document.getElementById("editText").value;item.updatedAt=Date.now();saveState();renderList();renderReader();isDirty=false;setSaveStatus("Guardado");if(!silent) toast("Guardado");if(goBack) openReader()}
 function leaveEditor(){if(isDirty) saveCurrent(true);else openReader()}
-function newItem(){const id=uid();const title=section==="prayers"?"Nueva oración":"Nueva nota";const entry={id:id,title:title,content:"",updatedAt:Date.now(),favorite:false};const items=getItems();items.unshift(entry);setItems(items);setCurrentId(id);renderList();renderReader();openEditor()}
-function moveToTrash(){const item=currentItem();if(!item) return;const items=getItems();if(items.length===1) return alert("Debe quedar al menos un elemento.");const typeName=section==="prayers"?"oración":"nota";if(!confirm('¿Mover a papelera esta '+typeName+'?\n"'+item.title+'"')) return;const trash=getTrash();trash.unshift({...item,deletedAt:Date.now()});const filtered=items.filter(x=>x.id!==item.id);setItems(filtered);if(section==="prayers") state.currentPrayerId=filtered[0].id;else state.currentNoteId=filtered[0].id;saveState();renderList();renderReader();openReader();toast("Movido a papelera")}
+function newItem(){const id=uid();const title=section==="prayers"?"Nueva oración":"Nueva nota";const entry={"id":id,"title":title,"content":"","updatedAt":Date.now(),"favorite":false};const items=getItems();items.unshift(entry);setItems(items);setCurrentId(id);renderList();renderReader();openEditor()}
+function moveToTrash(){const item=currentItem();if(!item) return;const items=getItems();if(items.length===1) return alert("Debe quedar al menos un elemento.");const typeName=section==="prayers"?"oración":"nota";if(!confirm('¿Mover a papelera esta '+typeName+'?\n"'+item.title+'"')) return;const trash=getTrash();trash.unshift({...item,"deletedAt":Date.now()});const filtered=items.filter(x=>x.id!==item.id);setItems(filtered);if(section==="prayers") state.currentPrayerId=filtered[0].id;else state.currentNoteId=filtered[0].id;saveState();renderList();renderReader();openReader();toast("Movido a papelera")}
 function openTrash(){document.getElementById("trashView").classList.remove("hidden");document.getElementById("readerView").classList.add("hidden");document.getElementById("editorView").classList.add("hidden");document.getElementById("backupView").classList.add("hidden");renderTrash()}
 function renderTrash(){const box=document.getElementById("trashList");box.innerHTML="";const trash=getTrash();if(!trash.length){box.innerHTML='<div class="empty">La papelera está vacía.</div>';return}trash.forEach(item=>{const div=document.createElement("div");div.className="trash-item";div.innerHTML='<div class="trash-title">'+escapeHtml(item.title||"Sin título")+'</div><div class="row"><button class="btn soft" type="button" onclick="restoreFromTrash(\''+item.id+'\')">Restaurar</button><button class="btn danger" type="button" onclick="deleteForever(\''+item.id+'\')">Borrar definitivo</button></div>';box.appendChild(div)})}
 function restoreFromTrash(id){const trash=getTrash();const idx=trash.findIndex(x=>x.id===id);if(idx<0) return;const item=trash.splice(idx,1)[0];const items=getItems();items.unshift(item);setItems(items);setCurrentId(item.id);saveState();renderList();renderReader();renderTrash();toast("Restaurado")}
@@ -201,12 +230,12 @@ function copyCurrent(){const item=currentItem();if(!item) return;navigator.clipb
 function toggleFavorite(){const item=currentItem();if(!item) return;item.favorite=!item.favorite;item.updatedAt=Date.now();saveState();renderList();renderReader();toast(item.favorite?"Marcado como favorito":"Quitado de favoritos")}
 function openBackup(){document.getElementById("backupView").classList.remove("hidden");document.getElementById("readerView").classList.add("hidden");document.getElementById("editorView").classList.add("hidden");document.getElementById("trashView").classList.add("hidden")}
 function downloadTextFile(filename,text){try{const blob=new Blob([text],{type:"application/json;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1200)}catch(e){}}
-async function exportBackup(){const payload={exportedAt:new Date().toISOString(),...state};const text=JSON.stringify(payload,null,2);document.getElementById("backupText").value=text;downloadTextFile("backup_oraciones_notas.json",text);try{await navigator.clipboard.writeText(text)}catch(e){}toast("Backup listo")}
-function importBackup(){const text=document.getElementById("backupText").value.trim();if(!text) return alert("Pega primero una copia.");try{const parsed=JSON.parse(text);if(!Array.isArray(parsed.prayers)||!Array.isArray(parsed.notes)) throw new Error("bad");state={section:parsed.section||"prayers",currentPrayerId:parsed.currentPrayerId||(parsed.prayers[0]&&parsed.prayers[0].id),currentNoteId:parsed.currentNoteId||(parsed.notes[0]&&parsed.notes[0].id),prayers:parsed.prayers,notes:parsed.notes,trashPrayers:Array.isArray(parsed.trashPrayers)?parsed.trashPrayers:[],trashNotes:Array.isArray(parsed.trashNotes)?parsed.trashNotes:[]};saveState();section=state.section;syncTabs();renderList();renderReader();openReader();toast("Backup importado")}catch(e){alert("La copia no es válida.")}}
-function showInstallBox(){document.getElementById("installBox").classList.remove("hidden");const txt=document.getElementById("installText");if(deferredPrompt) txt.textContent="Pulsa instalar aquí abajo. Si no funciona, usa el menú del navegador y elige “Añadir a pantalla de inicio”.";else txt.textContent="Si Chrome no muestra instalación automática, usa el menú del navegador y elige “Añadir a pantalla de inicio”.";}
+async function exportBackup(){const payload={"exportedAt":new Date().toISOString(),...state};const text=JSON.stringify(payload,null,2);document.getElementById("backupText").value=text;downloadTextFile("backup_oraciones_notas.json",text);try{await navigator.clipboard.writeText(text)}catch(e){}toast("Backup listo")}
+function importBackup(){const text=document.getElementById("backupText").value.trim();if(!text) return alert("Pega primero una copia.");try{const parsed=JSON.parse(text);if(!Array.isArray(parsed.prayers)||!Array.isArray(parsed.notes)) throw new Error("bad");state={"section":parsed.section||"prayers","currentPrayerId":parsed.currentPrayerId||(parsed.prayers[0]&&parsed.prayers[0].id),"currentNoteId":parsed.currentNoteId||(parsed.notes[0]&&parsed.notes[0].id),"prayers":parsed.prayers,"notes":parsed.notes,"trashPrayers":Array.isArray(parsed.trashPrayers)?parsed.trashPrayers:[],"trashNotes":Array.isArray(parsed.trashNotes)?parsed.trashNotes:[]};saveState();section=state.section;syncTabs();renderList();renderReader();openReader();toast("Backup importado")}catch(e){alert("La copia no es válida.")}}
+function showInstallBox(){document.getElementById("installBox").classList.remove("hidden");const txt=document.getElementById("installText");if(isStandalone()) txt.textContent="Ya está abierta en modo app real. Desde ahora ábrela siempre desde su icono.";else if(deferredPrompt) txt.textContent="Pulsa instalar aquí abajo. Si no aparece, usa el menú del navegador y elige “Añadir a pantalla de inicio”. Luego ábrela siempre desde el icono.";else txt.textContent="Chrome no ha ofrecido instalación automática. Usa el menú del navegador y elige “Añadir a pantalla de inicio”. Después ábrela siempre desde el icono para tener modo app real.";}
 function hideInstallBox(){document.getElementById("installBox").classList.add("hidden")}
 window.addEventListener("beforeinstallprompt", e=>{e.preventDefault();deferredPrompt=e;})
-document.addEventListener("DOMContentLoaded",()=>{document.getElementById("editTitle").addEventListener("input",scheduleAutosave);document.getElementById("editText").addEventListener("input",scheduleAutosave);document.getElementById("installBtn").addEventListener("click", async ()=>{if(!deferredPrompt){toast("Usa el menú del navegador: Añadir a pantalla de inicio");return}deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null;hideInstallBox();})})
+document.addEventListener("DOMContentLoaded",()=>{document.getElementById("editTitle").addEventListener("input",scheduleAutosave);document.getElementById("editText").addEventListener("input",scheduleAutosave);document.getElementById("installBtn").addEventListener("click", async ()=>{if(!deferredPrompt){toast("Usa el menú del navegador: Añadir a pantalla de inicio");return}deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null;hideInstallBox();});if(isStandalone()) document.body.classList.add("standalone");setTimeout(()=>document.getElementById("splash").classList.add("hide"),450)})
 window.addEventListener("appinstalled",()=>{hideInstallBox();toast("App instalada")})
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js")})}
 applyTheme();loadState();syncTabs();renderList();renderReader();openReader();

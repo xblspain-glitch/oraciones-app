@@ -2,9 +2,10 @@
   "name": "Oraciones y Notas",
   "short_name": "Oraciones",
   "id": "/oraciones-app/",
-  "start_url": "/oraciones-app/",
+  "start_url": "/oraciones-app/?source=pwa",
   "scope": "/oraciones-app/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#111111",
   "theme_color": "#111111",
   "icons": [
