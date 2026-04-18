@@ -29,6 +29,7 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 .segment button{border:none;background:transparent;padding:8px 12px;border-radius:10px;cursor:pointer}
 .segment button.active{background:var(--card);font-weight:bold}
 .search{flex:1;min-width:180px;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:14px;padding:10px 12px;font-size:15px}
+.counter{font-size:13px;color:var(--muted);padding:0 2px}
 .main{display:grid;grid-template-columns:300px 1fr;min-height:calc(100dvh - 68px)}
 .sidebar{border-right:1px solid var(--line);overflow:auto;background:var(--bg);padding:10px}
 .list{display:flex;flex-direction:column;gap:8px}
@@ -36,12 +37,14 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 .item.active{outline:2px solid var(--primary)}
 .item-title-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .item-title{font-weight:bold;margin-bottom:4px}
+.item-code{font-size:12px;color:var(--muted);font-weight:bold;margin-bottom:6px}
 .item-sub{color:var(--muted);font-size:13px}
 .fav{color:var(--accent);font-size:18px}
 .content{min-width:0;overflow:auto;padding:12px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:20px;min-height:calc(100dvh - 92px);display:flex;flex-direction:column;overflow:hidden}
 .panel-head{position:sticky;top:0;z-index:3;display:flex;gap:8px;flex-wrap:wrap;padding:10px;border-bottom:1px solid var(--line);background:var(--card)}
-.reader-title{font-size:24px;font-weight:bold;padding:16px 18px 0}
+.reader-code{font-size:13px;color:var(--muted);font-weight:bold;padding:16px 18px 0}
+.reader-title{font-size:24px;font-weight:bold;padding:6px 18px 0}
 .reader-text{white-space:pre-wrap;padding:18px 18px 40px;font-size:24px;line-height:2.05}
 .title-input{width:100%;border:none;border-bottom:1px solid var(--line);outline:none;background:var(--card);color:var(--text);font-size:22px;font-weight:bold;padding:14px 16px}
 .text-input,.backup-text{flex:1;width:100%;border:none;outline:none;resize:none;background:var(--card);color:var(--text);font-size:18px;line-height:1.7;padding:18px;min-height:50dvh}
@@ -65,7 +68,8 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 .fullscreen-reading .content{padding:0}
 .fullscreen-reading .panel{border:none;border-radius:0;min-height:100dvh}
 .fullscreen-reading .panel-head{position:sticky;top:0;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;border-radius:0}
-.fullscreen-reading .reader-title{font-size:22px;padding:14px 16px 0}
+.fullscreen-reading .reader-code{font-size:13px;padding:16px 16px 0}
+.fullscreen-reading .reader-title{font-size:22px;padding:6px 16px 0}
 .fullscreen-reading .reader-text{font-size:25px;line-height:2.1;padding:16px 16px 48px;min-height:100dvh}
 .fullscreen-reading.hide-reading-ui .panel-head{opacity:0;pointer-events:none;transform:translateY(-12px)}
 @media (display-mode: standalone){
@@ -80,7 +84,8 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
   .content{padding:0}
   .panel{border:none;border-radius:0;min-height:calc(100dvh - 62px)}
   .panel-head{padding:8px;border-radius:0}
-  .reader-title{font-size:22px;padding:14px 16px 0}
+  .reader-code{font-size:13px;padding:14px 16px 0}
+  .reader-title{font-size:22px;padding:6px 16px 0}
   .reader-text{font-size:23px;line-height:2;padding:16px 16px 34px}
   .text-input,.backup-text{font-size:18px;line-height:1.7;min-height:56dvh}
   .search{order:2;width:100%;flex-basis:100%}
@@ -112,7 +117,8 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
     <button class="btn soft" type="button" onclick="openTrash()">🗑️ Papelera</button>
     <button class="btn soft" type="button" onclick="toggleTheme()">🌙</button>
     <button class="btn danger" type="button" onclick="moveToTrash()">🗑️ Eliminar</button>
-    <input id="search" class="search" placeholder="Buscar oración..." oninput="renderList()">
+    <input id="search" class="search" placeholder="Buscar..." oninput="renderList()">
+    <div id="counterInfo" class="counter"></div>
   </div>
 </div>
 
@@ -130,6 +136,7 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
         <button class="btn soft" type="button" onclick="toggleFavorite()">⭐</button>
         <button class="btn soft" type="button" onclick="exportCurrentHTML()">🌐 Exportar lectura</button>
       </div>
+      <div id="readerCode" class="reader-code"></div>
       <div id="readerTitle" class="reader-title"></div>
       <div id="readerText" class="reader-text" onclick="toggleReadingUI()"></div>
     </div>
@@ -173,14 +180,13 @@ body.dark .topbar{background:rgba(17,17,17,.96)}
 </div>
 
 <div id="toast" class="toast">Guardado</div>
-
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
-const STORAGE_KEY="oraciones_import_file_text_v1";
-const AUTO_BACKUP_KEY="oraciones_import_file_text_auto_backup_v1";
-const THEME_KEY="oraciones_import_file_text_theme_v1";
-const SIZE_KEY="oraciones_import_file_text_reader_size_v1";
-const INSTALL_DISMISSED_KEY="oraciones_import_file_text_dismiss_v1";
+const STORAGE_KEY="oraciones_full_numeracion_v1";
+const AUTO_BACKUP_KEY="oraciones_full_numeracion_auto_backup_v1";
+const THEME_KEY="oraciones_full_numeracion_theme_v1";
+const SIZE_KEY="oraciones_full_numeracion_reader_size_v1";
+const INSTALL_DISMISSED_KEY="oraciones_full_numeracion_dismiss_v1";
 let deferredPrompt=null;
 let readerSize=parseInt(localStorage.getItem(SIZE_KEY)||"24",10);
 let section="prayers";
@@ -199,7 +205,9 @@ function loadState(){const raw=localStorage.getItem(STORAGE_KEY);if(raw){try{sta
 function restoreAutoBackup(){const raw=localStorage.getItem(AUTO_BACKUP_KEY);if(!raw) return alert("No hay backup automático.");if(!confirm("¿Restaurar el backup automático?")) return;try{const parsed=JSON.parse(raw);state={"section":parsed.section||"prayers","currentPrayerId":parsed.currentPrayerId||null,"currentNoteId":parsed.currentNoteId||null,"prayers":Array.isArray(parsed.prayers)?parsed.prayers:[],"notes":Array.isArray(parsed.notes)?parsed.notes:[],"trashPrayers":Array.isArray(parsed.trashPrayers)?parsed.trashPrayers:[],"trashNotes":Array.isArray(parsed.trashNotes)?parsed.trashNotes:[]};saveState();section=state.section;syncTabs();renderList();renderReader();openReader();toast("Backup automático restaurado")}catch(e){alert("No se pudo restaurar.")}}
 function applyTheme(){if(localStorage.getItem(THEME_KEY)==="dark") document.body.classList.add("dark")}
 function toggleTheme(){document.body.classList.toggle("dark");localStorage.setItem(THEME_KEY, document.body.classList.contains("dark")?"dark":"light")}
-function syncTabs(){document.getElementById("tabPrayers").classList.toggle("active",section==="prayers");document.getElementById("tabNotes").classList.toggle("active",section==="notes");document.getElementById("search").placeholder=section==="prayers"?"Buscar oración...":"Buscar nota..."}
+function getDisplayCode(idx, kind){return (kind==="prayers"?"O":"N")+(idx+1)}
+function getCurrentCode(){const items=section==="prayers"?state.prayers:state.notes;const id=section==="prayers"?state.currentPrayerId:state.currentNoteId;const idx=items.findIndex(x=>x.id===id);return idx>=0?getDisplayCode(idx, section):""}
+function syncTabs(){document.getElementById("tabPrayers").classList.toggle("active",section==="prayers");document.getElementById("tabNotes").classList.toggle("active",section==="notes");document.getElementById("search").placeholder=section==="prayers"?"Buscar oración o código (ej. O3)":"Buscar nota o código (ej. N2)";document.getElementById("counterInfo").textContent=`📖 ${state.prayers.length} | 📝 ${state.notes.length}`}
 function switchSection(next){if(!document.getElementById("editorView").classList.contains("hidden")) saveCurrent(false,true);section=next;state.section=next;saveState();syncTabs();renderList();renderReader();openReader()}
 function getItems(){return section==="prayers"?state.prayers:state.notes}
 function setItems(items){if(section==="prayers") state.prayers=items;else state.notes=items}
@@ -209,8 +217,8 @@ function currentItem(){const items=getItems();const id=section==="prayers"?state
 function setCurrentId(id){if(section==="prayers") state.currentPrayerId=id;else state.currentNoteId=id;saveState()}
 function escapeHtml(str){return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
 function slugify(str){return String(str).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\w\s-]/g,"").trim().replace(/\s+/g,"-").toLowerCase() || "sin-titulo"}
-function renderList(){const q=document.getElementById("search").value.trim().toLowerCase(),list=document.getElementById("list");list.innerHTML="";const items=[...getItems()].sort((a,b)=>(b.favorite===true)-(a.favorite===true)||b.updatedAt-a.updatedAt).filter(item=>item.title.toLowerCase().includes(q)||item.content.toLowerCase().includes(q));if(!items.length){list.innerHTML='<div class="empty">No hay elementos.</div>';return}const current=currentItem();items.forEach(item=>{const div=document.createElement("div");div.className="item"+(current&&item.id===current.id?" active":"");const preview=item.content.trim().replace(/\n+/g," ").slice(0,70)||"Sin contenido";div.innerHTML='<div class="item-title-row"><div class="item-title">'+escapeHtml(item.title||"Sin título")+'</div><div class="fav">'+(item.favorite?'⭐':'')+'</div></div><div class="item-sub">'+escapeHtml(preview)+'</div>';div.onclick=()=>{if(!document.getElementById("editorView").classList.contains("hidden")) saveCurrent(false,true);setCurrentId(item.id);renderList();renderReader();openReader()};list.appendChild(div)})}
-function renderReader(){const item=currentItem();if(!item) return;document.getElementById("readerTitle").textContent=item.favorite?'⭐ '+item.title:item.title;document.getElementById("readerText").textContent=item.content;document.getElementById("readerText").style.fontSize=readerSize+"px"}
+function renderList(){const q=document.getElementById("search").value.trim().toLowerCase(),list=document.getElementById("list");list.innerHTML="";let items=[...getItems()].map((item, idx)=>({...item,__idx:idx,__code:getDisplayCode(idx, section)}));items=items.filter(item=>!q || item.title.toLowerCase().includes(q) || item.content.toLowerCase().includes(q) || item.__code.toLowerCase()===q);items.sort((a,b)=>(b.favorite===true)-(a.favorite===true)||b.updatedAt-a.updatedAt);if(!items.length){list.innerHTML='<div class="empty">No hay elementos.</div>';return}const current=currentItem();items.forEach(item=>{const div=document.createElement("div");div.className="item"+(current&&item.id===current.id?" active":"");const preview=item.content.trim().replace(/\n+/g," ").slice(0,70)||"Sin contenido";div.innerHTML='<div class="item-code">'+escapeHtml(item.__code)+'</div><div class="item-title-row"><div class="item-title">'+escapeHtml(item.title||"Sin título")+'</div><div class="fav">'+(item.favorite?'⭐':'')+'</div></div><div class="item-sub">'+escapeHtml(preview)+'</div>';div.onclick=()=>{if(!document.getElementById("editorView").classList.contains("hidden")) saveCurrent(false,true);setCurrentId(item.id);renderList();renderReader();openReader()};list.appendChild(div)})}
+function renderReader(){const item=currentItem();if(!item) return;document.getElementById("readerCode").textContent=getCurrentCode();document.getElementById("readerTitle").textContent=item.favorite?'⭐ '+item.title:item.title;document.getElementById("readerText").textContent=item.content;document.getElementById("readerText").style.fontSize=readerSize+"px"}
 function openReader(){document.getElementById("readerView").classList.remove("hidden");document.getElementById("editorView").classList.add("hidden");document.getElementById("backupView").classList.add("hidden");document.getElementById("trashView").classList.add("hidden");document.body.classList.remove("fullscreen-reading","hide-reading-ui");if(window.innerWidth<=860) document.body.classList.add("reading-mobile");else document.body.classList.remove("reading-mobile")}
 function openList(){document.body.classList.remove("reading-mobile","fullscreen-reading","hide-reading-ui");document.getElementById("search").focus()}
 function enterFullscreenReading(){document.getElementById("readerView").classList.remove("hidden");document.getElementById("editorView").classList.add("hidden");document.getElementById("backupView").classList.add("hidden");document.getElementById("trashView").classList.add("hidden");document.body.classList.add("fullscreen-reading");document.body.classList.remove("reading-mobile","hide-reading-ui");window.scrollTo({top:0,behavior:"smooth"});toast("Pantalla completa")}
@@ -218,13 +226,13 @@ function exitFullscreenReading(){document.body.classList.remove("fullscreen-read
 function toggleReadingUI(){if(!document.body.classList.contains("fullscreen-reading")) return;document.body.classList.toggle("hide-reading-ui")}
 function openEditor(){const item=currentItem();if(!item) return;document.getElementById("editTitle").value=item.title;document.getElementById("editText").value=item.content;document.getElementById("editorView").classList.remove("hidden");document.getElementById("readerView").classList.add("hidden");document.getElementById("backupView").classList.add("hidden");document.getElementById("trashView").classList.add("hidden");document.body.classList.remove("reading-mobile","fullscreen-reading","hide-reading-ui");isDirty=false;setSaveStatus("Sin cambios")}
 function scheduleAutosave(){isDirty=true;setSaveStatus("Cambios sin guardar");if(autosaveTimer) clearTimeout(autosaveTimer);autosaveTimer=setTimeout(()=>saveCurrent(false,true),1200)}
-function saveCurrent(goBack=false,silent=false){const editor=document.getElementById("editorView");if(editor.classList.contains("hidden")) return;const item=currentItem();if(!item) return;item.title=document.getElementById("editTitle").value.trim()||"Sin título";item.content=document.getElementById("editText").value;item.updatedAt=Date.now();saveState();renderList();renderReader();isDirty=false;setSaveStatus("Guardado");if(!silent) toast("Guardado");if(goBack) openReader()}
+function saveCurrent(goBack=false,silent=false){const editor=document.getElementById("editorView");if(editor.classList.contains("hidden")) return;const item=currentItem();if(!item) return;item.title=document.getElementById("editTitle").value.trim()||"Sin título";item.content=document.getElementById("editText").value;item.updatedAt=Date.now();saveState();syncTabs();renderList();renderReader();isDirty=false;setSaveStatus("Guardado");if(!silent) toast("Guardado");if(goBack) openReader()}
 function leaveEditor(){if(isDirty) saveCurrent(true);else openReader()}
-function newItem(){const id=uid();const title=section==="prayers"?"Nueva oración":"Nueva nota";const entry={"id":id,"title":title,"content":"","updatedAt":Date.now(),"favorite":false};const items=getItems();items.unshift(entry);setItems(items);setCurrentId(id);renderList();renderReader();openEditor()}
-function moveToTrash(){const item=currentItem();if(!item) return;const items=getItems();if(items.length===1) return alert("Debe quedar al menos un elemento.");const typeName=section==="prayers"?"oración":"nota";if(!confirm('¿Mover a papelera esta '+typeName+'?\n"'+item.title+'"')) return;const trash=getTrash();trash.unshift({...item,"deletedAt":Date.now()});const filtered=items.filter(x=>x.id!==item.id);setItems(filtered);if(section==="prayers") state.currentPrayerId=filtered[0].id;else state.currentNoteId=filtered[0].id;saveState();renderList();renderReader();openReader();toast("Movido a papelera")}
+function newItem(){const id=uid();const title=section==="prayers"?"Nueva oración":"Nueva nota";const entry={"id":id,"title":title,"content":"","updatedAt":Date.now(),"favorite":false};const items=getItems();items.unshift(entry);setItems(items);setCurrentId(id);saveState();syncTabs();renderList();renderReader();openEditor()}
+function moveToTrash(){const item=currentItem();if(!item) return;const items=getItems();if(items.length===1) return alert("Debe quedar al menos un elemento.");const typeName=section==="prayers"?"oración":"nota";if(!confirm('¿Mover a papelera esta '+typeName+'?\n"'+item.title+'"')) return;const trash=getTrash();trash.unshift({...item,"deletedAt":Date.now()});const filtered=items.filter(x=>x.id!==item.id);setItems(filtered);if(section==="prayers") state.currentPrayerId=filtered[0].id;else state.currentNoteId=filtered[0].id;saveState();syncTabs();renderList();renderReader();openReader();toast("Movido a papelera")}
 function openTrash(){document.getElementById("trashView").classList.remove("hidden");document.getElementById("readerView").classList.add("hidden");document.getElementById("editorView").classList.add("hidden");document.getElementById("backupView").classList.add("hidden");renderTrash()}
 function renderTrash(){const box=document.getElementById("trashList");box.innerHTML="";const trash=getTrash();if(!trash.length){box.innerHTML='<div class="empty">La papelera está vacía.</div>';return}trash.forEach(item=>{const div=document.createElement("div");div.className="trash-item";div.innerHTML='<div class="trash-title">'+escapeHtml(item.title||"Sin título")+'</div><div class="row"><button class="btn soft" type="button" onclick="restoreFromTrash(\''+item.id+'\')">Restaurar</button><button class="btn danger" type="button" onclick="deleteForever(\''+item.id+'\')">Borrar definitivo</button></div>';box.appendChild(div)})}
-function restoreFromTrash(id){const trash=getTrash();const idx=trash.findIndex(x=>x.id===id);if(idx<0) return;const item=trash.splice(idx,1)[0];const items=getItems();items.unshift(item);setItems(items);setCurrentId(item.id);saveState();renderList();renderReader();renderTrash();toast("Restaurado")}
+function restoreFromTrash(id){const trash=getTrash();const idx=trash.findIndex(x=>x.id===id);if(idx<0) return;const item=trash.splice(idx,1)[0];const items=getItems();items.unshift(item);setItems(items);setCurrentId(item.id);saveState();syncTabs();renderList();renderReader();renderTrash();toast("Restaurado")}
 function deleteForever(id){const trash=getTrash();const item=trash.find(x=>x.id===id);if(!item) return;if(!confirm('¿Borrar definitivamente "'+item.title+'"?')) return;setTrash(trash.filter(x=>x.id!==id));saveState();renderTrash();toast("Borrado definitivo")}
 function emptyTrash(){const trash=getTrash();if(!trash.length) return alert("La papelera ya está vacía.");if(!confirm("¿Vaciar toda la papelera? Esta acción no se puede deshacer.")) return;setTrash([]);saveState();renderTrash();toast("Papelera vaciada")}
 function copyCurrent(){const item=currentItem();if(!item) return;navigator.clipboard.writeText(item.content).then(()=>toast("Copiado")).catch(()=>alert("No se pudo copiar."))}
@@ -232,9 +240,9 @@ function toggleFavorite(){const item=currentItem();if(!item) return;item.favorit
 function changeReaderSize(delta){readerSize+=delta;if(readerSize<20) readerSize=20;if(readerSize>34) readerSize=34;localStorage.setItem(SIZE_KEY, String(readerSize));renderReader()}
 function openBackup(){document.getElementById("backupView").classList.remove("hidden");document.getElementById("readerView").classList.add("hidden");document.getElementById("editorView").classList.add("hidden");document.getElementById("trashView").classList.add("hidden")}
 function downloadBlob(filename, blob){const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500)}
-function buildReadingHTML(item, folderLabel){const title=item.favorite?'⭐ '+item.title:item.title;const bg=document.body.classList.contains("dark") ? "#111111" : "#f8f6f1";const card=document.body.classList.contains("dark") ? "#1a1a1a" : "#ffffff";const text=document.body.classList.contains("dark") ? "#f2eee7" : "#181818";return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"><title>${escapeHtml(item.title)}</title><style>body{margin:0;background:${bg};color:${text};font-family:Arial,sans-serif}.wrap{max-width:900px;margin:0 auto;padding:24px}.card{background:${card};border-radius:20px;padding:24px}.badge{font-size:13px;opacity:.7;margin-bottom:10px}h1{font-size:24px;margin:0 0 18px 0}.content{white-space:pre-wrap;font-size:${readerSize}px;line-height:2.05}</style></head><body><div class="wrap"><div class="card"><div class="badge">${escapeHtml(folderLabel)}</div><h1>${escapeHtml(title)}</h1><div class="content">${escapeHtml(item.content)}</div></div></div></body></html>`}
-async function exportCurrentHTML(){const item=currentItem();if(!item) return;const label=section==="prayers"?"Oración":"Nota";const html=buildReadingHTML(item,label);const filename=slugify(item.title)+".html";downloadBlob(filename, new Blob([html],{type:"text/html;charset=utf-8"}));if(navigator.share){try{const file=new File([html], filename, {type:"text/html"});await navigator.share({title:item.title, files:[file]})}catch(e){}}toast("Lectura exportada")}
-async function exportAllZip(){if(typeof JSZip==="undefined"){alert("No se pudo cargar el exportador ZIP.");return}const zip=new JSZip();const payload={"exportedAt":new Date().toISOString(),...state};zip.file("backup.json", JSON.stringify(payload,null,2));const folders=[["oraciones", state.prayers, "Oración"],["notas", state.notes, "Nota"],["papelera/oraciones", state.trashPrayers, "Oración eliminada"],["papelera/notas", state.trashNotes, "Nota eliminada"]];folders.forEach(([folder, items, label])=>{items.forEach((item, idx)=>{const name=(slugify(item.title)||("item-"+idx))+".html";zip.folder(folder).file(name, buildReadingHTML(item,label))})});const blob=await zip.generateAsync({type:"blob"});downloadBlob("exportacion_oraciones_notas.zip", blob);toast("ZIP exportado")}
+function buildReadingHTML(item, folderLabel, code){const title=item.favorite?'⭐ '+item.title:item.title;const bg=document.body.classList.contains("dark") ? "#111111" : "#f8f6f1";const card=document.body.classList.contains("dark") ? "#1a1a1a" : "#ffffff";const text=document.body.classList.contains("dark") ? "#f2eee7" : "#181818";return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"><title>${escapeHtml(item.title)}</title><style>body{margin:0;background:${bg};color:${text};font-family:Arial,sans-serif}.wrap{max-width:900px;margin:0 auto;padding:24px}.card{background:${card};border-radius:20px;padding:24px}.badge{font-size:13px;opacity:.7;margin-bottom:10px}h1{font-size:24px;margin:0 0 18px 0}.content{white-space:pre-wrap;font-size:${readerSize}px;line-height:2.05}</style></head><body><div class="wrap"><div class="card"><div class="badge">${escapeHtml(folderLabel)} ${escapeHtml(code||"")}</div><h1>${escapeHtml(title)}</h1><div class="content">${escapeHtml(item.content)}</div></div></div></body></html>`}
+async function exportCurrentHTML(){const item=currentItem();if(!item) return;const label=section==="prayers"?"Oración":"Nota";const html=buildReadingHTML(item,label,getCurrentCode());const filename=slugify(item.title)+".html";downloadBlob(filename, new Blob([html],{type:"text/html;charset=utf-8"}));if(navigator.share){try{const file=new File([html], filename, {type:"text/html"});await navigator.share({title:item.title, files:[file]})}catch(e){}}toast("Lectura exportada")}
+async function exportAllZip(){if(typeof JSZip==="undefined"){alert("No se pudo cargar el exportador ZIP.");return}const zip=new JSZip();const payload={"exportedAt":new Date().toISOString(),...state};zip.file("backup.json", JSON.stringify(payload,null,2));const folders=[["oraciones", state.prayers, "Oración","O"],["notas", state.notes, "Nota","N"],["papelera/oraciones", state.trashPrayers, "Oración eliminada","O"],["papelera/notas", state.trashNotes, "Nota eliminada","N"]];folders.forEach(([folder, items, label, prefix])=>{items.forEach((item, idx)=>{const code=prefix+(idx+1);const name=(code+"-"+slugify(item.title))+".html";zip.folder(folder).file(name, buildReadingHTML(item,label,code))})});const blob=await zip.generateAsync({type:"blob"});downloadBlob("exportacion_oraciones_notas.zip", blob);toast("ZIP exportado")}
 async function exportBackup(){const payload={"exportedAt":new Date().toISOString(),...state};const text=JSON.stringify(payload,null,2);document.getElementById("backupText").value=text;const now=new Date();const stamp=now.getFullYear().toString()+String(now.getMonth()+1).padStart(2,"0")+String(now.getDate()).padStart(2,"0")+"_"+String(now.getHours()).padStart(2,"0")+String(now.getMinutes()).padStart(2,"0");downloadBlob("backup_oraciones_notas_"+stamp+".json", new Blob([text],{type:"application/json;charset=utf-8"}));try{await navigator.clipboard.writeText(text)}catch(e){}if(navigator.share){try{await navigator.share({title:"Backup Oraciones y Notas", text:text})}catch(e){}}toast("Backup listo")}
 function applyImportedData(parsed){if(!Array.isArray(parsed.prayers)||!Array.isArray(parsed.notes)) throw new Error("bad");state={"section":parsed.section||"prayers","currentPrayerId":parsed.currentPrayerId||(parsed.prayers[0]&&parsed.prayers[0].id),"currentNoteId":parsed.currentNoteId||(parsed.notes[0]&&parsed.notes[0].id),"prayers":parsed.prayers,"notes":parsed.notes,"trashPrayers":Array.isArray(parsed.trashPrayers)?parsed.trashPrayers:[],"trashNotes":Array.isArray(parsed.trashNotes)?parsed.trashNotes:[]};saveState();section=state.section;syncTabs();renderList();renderReader();openReader();toast("Backup importado")}
 function importBackupFromText(){const text=document.getElementById("backupText").value.trim();if(!text) return alert("Pega primero una copia.");try{applyImportedData(JSON.parse(text))}catch(e){alert("La copia no es válida.")}}
@@ -242,20 +250,7 @@ function importBackupFromFile(file){const reader=new FileReader();reader.onload=
 function dismissInstall(){localStorage.setItem(INSTALL_DISMISSED_KEY,"1");document.getElementById("installBanner").classList.add("hidden")}
 function maybeShowInstall(){if(isStandalone()) return;if(localStorage.getItem(INSTALL_DISMISSED_KEY)==="1") return;document.getElementById("installBanner").classList.remove("hidden");const help=document.getElementById("installHelp");if(deferredPrompt) help.textContent="Pulsa Instalar. Si no te deja, usa el menú del navegador y elige Añadir a pantalla de inicio.";else help.textContent="Si no aparece el instalador automático, usa el menú del navegador y elige Añadir a pantalla de inicio."}
 window.addEventListener("beforeinstallprompt", e=>{e.preventDefault();deferredPrompt=e;maybeShowInstall()})
-document.addEventListener("DOMContentLoaded",()=>{
-  document.getElementById("installBtn").addEventListener("click", async ()=>{if(!deferredPrompt){toast("Usa el menú del navegador: Añadir a pantalla de inicio");return}deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null;document.getElementById("installBanner").classList.add("hidden")});
-  document.getElementById("editTitle").addEventListener("input",scheduleAutosave);
-  document.getElementById("editText").addEventListener("input",scheduleAutosave);
-  const input=document.getElementById("jsonFileInput");
-  input.addEventListener("change", (e)=>{
-    const file=e.target.files && e.target.files[0];
-    if(!file) return;
-    document.getElementById("fileNameInfo").textContent="Archivo seleccionado: "+file.name;
-    importBackupFromFile(file);
-    input.value="";
-  });
-  if(isStandalone()) document.body.classList.add("standalone")
-})
+document.addEventListener("DOMContentLoaded",()=>{document.getElementById("installBtn").addEventListener("click", async ()=>{if(!deferredPrompt){toast("Usa el menú del navegador: Añadir a pantalla de inicio");return}deferredPrompt.prompt();try{await deferredPrompt.userChoice}catch(e){}deferredPrompt=null;document.getElementById("installBanner").classList.add("hidden")});document.getElementById("editTitle").addEventListener("input",scheduleAutosave);document.getElementById("editText").addEventListener("input",scheduleAutosave);const input=document.getElementById("jsonFileInput");input.addEventListener("change",(e)=>{const file=e.target.files && e.target.files[0];if(!file) return;document.getElementById("fileNameInfo").textContent="Archivo seleccionado: "+file.name;importBackupFromFile(file);input.value=""});if(isStandalone()) document.body.classList.add("standalone")})
 window.addEventListener("appinstalled",()=>{document.getElementById("installBanner").classList.add("hidden");toast("App instalada")})
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js")})}
 applyTheme();loadState();syncTabs();renderList();renderReader();openReader();maybeShowInstall();
